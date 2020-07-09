@@ -3,17 +3,19 @@
 // See "LICENSE" for license information.
 //
 
-#include "dxgi.h"
+#ifndef DX12_METAL_LIBRARY_H_
+#define DX12_METAL_LIBRARY_H_
 
-#include "dxgi_factory.h"
+//----------------------------------------------------------------------------------------------------------------------
+
+#ifdef interface
+#undef interface
+#endif
 
 //----------------------------------------------------------------------------------------------------------------------
 
-HRESULT WINAPI CreateDXGIFactory(REFIID riid, _COM_Outptr_ void **ppFactory)
-{
-    *ppFactory = new DXGIFactory();
-    
-    return S_OK;
-}
+#import <QuartzCore/CAMetalLayer.h>
+#import <Metal/Metal.h>
+#import <Cocoa/Cocoa.h>
 
-//----------------------------------------------------------------------------------------------------------------------
+#endif // DX12_METAL_LIBRARY_H_

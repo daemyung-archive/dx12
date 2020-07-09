@@ -14,8 +14,41 @@ STATIC
     include/glue.h
     include/dxgi.h
     include/d3d12.h
+    src/metal_library.h
+    src/metal_helper.h
+    src/unknown.h
+    src/unknown.cpp
     src/dxgi.cpp
+    src/dxgi_object.h
+    src/dxgi_object.cpp
+    src/dxgi_factory.h
+    src/dxgi_factory.cpp
+    src/dxgi_device_sub_object.h
+    src/dxgi_device_sub_object.cpp
+    src/dxgi_swap_chain.h
+    src/dxgi_swap_chain.cpp
+    src/d3d12_helper.h
     src/d3d12.cpp
+    src/d3d12_object.h
+    src/d3d12_object.cpp
+    src/d3d12_device.h
+    src/d3d12_device.cpp
+    src/d3d12_device_child.h
+    src/d3d12_device_child.cpp
+    src/d3d12_pageable.h
+    src/d3d12_pageable.cpp
+    src/d3d12_command_queue.h
+    src/d3d12_command_queue.cpp
+    src/d3d12_command_allocator.h
+    src/d3d12_command_allocator.cpp
+    src/d3d12_command_list.h
+    src/d3d12_command_list.cpp
+    src/d3d12_graphics_command_list.h
+    src/d3d12_graphics_command_list.cpp
+    src/d3d12_descriptor_heap.h
+    src/d3d12_descriptor_heap.cpp
+    src/d3d12_resource.h
+    src/d3d12_resource.cpp
 )
 
 target_include_directories(dx12
@@ -42,12 +75,18 @@ PROPERTIES
 
 if(BUILD_DEMO)
 
+find_package(glfw3 CONFIG REQUIRED)
+find_package(spdlog CONFIG REQUIRED)
+
 add_executable(dx12_demo
     demo/main.cpp
 )
 
 target_link_libraries(dx12_demo
+PRIVATE
     dx12
+    spdlog::spdlog
+    glfw
 )
 
 endif()

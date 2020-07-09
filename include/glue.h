@@ -3,13 +3,22 @@
 // See "LICENSE" for license information.
 //
 
-#ifndef DX12_GLUE_GUARD
-#define DX12_GLUE_GUARD
+//----------------------------------------------------------------------------------------------------------------------
+
+#ifndef interface
+#define interface struct
+#endif
+
+//----------------------------------------------------------------------------------------------------------------------
 
 #include <cstddef>
 #include <cstdint>
 #include <cwchar>
+#include <cstring>
 #include <objc/objc.h>
+
+#ifndef DX12_GLUE_H_
+#define DX12_GLUE_H_
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -43,13 +52,51 @@ using LONG     = int64_t;
 using LONGLONG = int64_t;
 using SIZE_T   = size_t;
 using FLOAT    = float;
-using HRESULT  = int64_t;
 using DWORD    = uint32_t;
+using PVOID    = void*;
 using LPVOID   = void*;
 using LPCVOID  = const void*;
 using LONG_PTR = uint64_t;
 using LPCSTR   = const char*;
 using LPCWSTR  = const wchar_t*;
+
+//----------------------------------------------------------------------------------------------------------------------
+
+using HRESULT = int64_t;
+
+#define S_OK   ((HRESULT)0x00000000L)
+#define E_FAIL ((HRESULT)0x80004005)
+
+//----------------------------------------------------------------------------------------------------------------------
+
+#define DXGI_ERROR_ACCESS_DENIED                ((HRESULT)0x887A002B)
+#define DXGI_ERROR_ACCESS_LOST                  ((HRESULT)0x887A0026)
+#define DXGI_ERROR_ALREADY_EXISTS               ((HRESULT)0x887A0036L)
+#define DXGI_ERROR_CANNOT_PROTECT_CONTENT       ((HRESULT)0x887A002A)
+#define DXGI_ERROR_DEVICE_HUNG                  ((HRESULT)0x887A0006)
+#define DXGI_ERROR_DEVICE_REMOVED               ((HRESULT)0x887A0005)
+#define DXGI_ERROR_DEVICE_RESET                 ((HRESULT)0x887A0007)
+#define DXGI_ERROR_DRIVER_INTERNAL_ERROR        ((HRESULT)0x887A0020)
+#define DXGI_ERROR_FRAME_STATISTICS_DISJOINT    ((HRESULT)0x887A000B)
+#define DXGI_ERROR_GRAPHICS_VIDPN_SOURCE_IN_USE ((HRESULT)0x887A000C)
+#define DXGI_ERROR_INVALID_CALL                 ((HRESULT)0x887A0001)
+#define DXGI_ERROR_MORE_DATA                    ((HRESULT)0x887A0003)
+#define DXGI_ERROR_NAME_ALREADY_EXISTS          ((HRESULT)0x887A002C)
+#define DXGI_ERROR_NONEXCLUSIVE                 ((HRESULT)0x887A0021)
+#define DXGI_ERROR_NOT_CURRENTLY_AVAILABLE      ((HRESULT)0x887A0022)
+#define DXGI_ERROR_NOT_FOUND                    ((HRESULT)0x887A0002)
+#define DXGI_ERROR_REMOTE_CLIENT_DISCONNECTED   ((HRESULT)0x887A0023)
+#define DXGI_ERROR_REMOTE_OUTOFMEMORY           ((HRESULT)0x887A0024)
+#define DXGI_ERROR_RESTRICT_TO_OUTPUT_STALE     ((HRESULT)0x887A0029)
+#define DXGI_ERROR_SDK_COMPONENT_MISSING        ((HRESULT)0x887A002D)
+#define DXGI_ERROR_SESSION_DISCONNECTED         ((HRESULT)0x887A0028)
+#define DXGI_ERROR_UNSUPPORTED                  ((HRESULT)0x887A0004)
+#define DXGI_ERROR_WAIT_TIMEOUT                 ((HRESULT)0x887A0027)
+#define DXGI_ERROR_WAS_STILL_DRAWING            ((HRESULT)0x887A000A)
+
+//----------------------------------------------------------------------------------------------------------------------
+
+#define FAILED(hr) (((HRESULT)(hr)) < 0)
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -90,7 +137,7 @@ struct GUID {
     ULONG  Data1;
     USHORT Data2;
     USHORT Data3;
-    UCHAR  Data4[8];
+    UCHAR  Data4[ 8 ];
 };
 
 using REFGUID = const GUID&;
@@ -156,8 +203,6 @@ extern "C++" { \
 
 #define COM_DECLSPEC_NOTHROW
 
-#define __STRUCT__ struct
-#define interface __STRUCT__
 #define STDMETHOD(method)        virtual COM_DECLSPEC_NOTHROW HRESULT STDMETHODCALLTYPE method
 #define STDMETHOD_(type,method)  virtual COM_DECLSPEC_NOTHROW type STDMETHODCALLTYPE method
 #define STDMETHODV(method)       virtual COM_DECLSPEC_NOTHROW HRESULT STDMETHODVCALLTYPE method
@@ -187,6 +232,10 @@ extern "C++" { \
 //----------------------------------------------------------------------------------------------------------------------
 
 #define __uuidof(x) UUID()
+
+//----------------------------------------------------------------------------------------------------------------------
+
+#define IID_PPV_ARGS(ppType) __uuidof(**(ppType)), reinterpret_cast<void**>(ppType)
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -236,6 +285,7 @@ IUnknown
 #define _Out_writes_opt_(s)
 #define _Out_writes_bytes_opt_(s)
 #define _Out_writes_to_opt_(s,c)
+#define _Outptr_
 #define _Outptr_opt_result_bytebuffer_(s)
 #define _Inout_
 #define _Inout_opt_
@@ -249,4 +299,12 @@ IUnknown
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#endif // DX12_GLUE_GUARD
+inline void ZeroMemory(
+    _In_  PVOID  Destination,
+    _In_  SIZE_T Length) {
+    memset(Destination, 0, Length);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+#endif // DX12_GLUE_H_
