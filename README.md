@@ -8,6 +8,7 @@
 
 * [ ] DirectX Graphics Infrastructure
 * [ ] DirectX 12
+* [ ] ComPtr
 
 ## Requirements
 
@@ -15,6 +16,13 @@
 * [Vcpkg](https://github.com/Microsoft/vcpkg)
 
 ## Build
+
+### Install dependencies
+
+```
+vcpkg install glfw3:x64-windows
+vcpkg install spdlog:x64-windows
+```
 
 ### Generate Project Files
 
