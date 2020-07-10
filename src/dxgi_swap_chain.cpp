@@ -13,27 +13,21 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-DXGISwapChain::DXGISwapChain(
-    DXGIFactory* factory_ptr,
-    D3D12CommandQueue* command_queue_ptr,
-    const DXGI_SWAP_CHAIN_DESC* desc_ptr)
-: DXGIDeviceSubObject(factory_ptr), command_queue_ptr_(command_queue_ptr) {
-    D3D12Device* device_ptr;
-    command_queue_ptr_->GetDevice(IID_PPV_ARGS(&device_ptr));
-    assert(device_ptr);
-
+DXGISwapChain::DXGISwapChain(DXGIFactory* factory, D3D12Device* device, D3D12CommandQueue* command_queue,
+    const DXGI_SWAP_CHAIN_DESC* desc)
+: DXGIDeviceSubObject(factory, device), command_queue_(command_queue), desc_(*desc) {
     layer_ = [CAMetalLayer layer];
-    layer_.device = device_ptr->GetDevice();
-    layer_.pixelFormat = ToPixelFormat(desc_ptr->BufferDesc.Format);
-    layer_.framebufferOnly = NO;
-    layer_.maximumDrawableCount = desc_ptr->BufferCount;
-    layer_.drawableSize = CGSizeMake(desc_ptr->BufferDesc.Width, desc_ptr->BufferDesc.Height);
+    assert(layer_);
 
-    [[(__bridge NSWindow*)desc_ptr->OutputWindow contentView] setLayer:layer_];
+    layer_.device = device_->GetDevice();
+    layer_.pixelFormat = ToPixelFormat(desc_.BufferDesc.Format);
+    layer_.framebufferOnly = IsFramebufferOnly(desc_.BufferUsage);
+    layer_.maximumDrawableCount = desc_.BufferCount;
+    layer_.drawableSize = CGSizeMake(desc_.BufferDesc.Width, desc_.BufferDesc.Height);
 
-    for (auto i = 0; i != desc_ptr->BufferCount; ++i) {
-        resource_ptrs_.push_back(std::make_unique<D3D12Resource>(device_ptr, this));
-    }
+    [[ToWindow(desc_.OutputWindow) contentView] setLayer:layer_];
+
+    buffer_ = std::make_unique<D3D12Resource>(device_, this);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -96,8 +90,7 @@ HRESULT STDMETHODCALLTYPE DXGISwapChain::GetParent(
     _In_  REFIID riid,
     /* [annotation][retval][out] */
     _COM_Outptr_  void **ppParent) {
-    assert(false && "Not implement!!!");
-    return S_OK;
+    return DXGIDeviceSubObject::GetParent(riid, ppParent);
 };
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -107,8 +100,7 @@ HRESULT STDMETHODCALLTYPE DXGISwapChain::GetDevice(
     _In_  REFIID riid,
     /* [annotation][retval][out] */
     _COM_Outptr_  void **ppDevice) {
-    assert(false && "Not implement!!!");
-    return S_OK;
+    return DXGIDeviceSubObject::GetDevice(riid, ppDevice);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -116,12 +108,13 @@ HRESULT STDMETHODCALLTYPE DXGISwapChain::GetDevice(
 HRESULT STDMETHODCALLTYPE DXGISwapChain::Present(
     /* [in] */ UINT SyncInterval,
     /* [in] */ UINT Flags) {
-    auto command_queue = command_queue_ptr_->GetCommandQueue();
-    auto command_buffer = [command_queue commandBuffer];
+    auto command_buffer = [command_queue_->GetCommandQueue() commandBuffer];
+    if (!command_buffer) {
+        return DXGI_ERROR_DEVICE_REMOVED;
+    }
 
     [command_buffer presentDrawable:drawable_];
     [command_buffer commit];
-
     drawable_ = nil;
 
     return S_OK;
@@ -135,7 +128,11 @@ HRESULT STDMETHODCALLTYPE DXGISwapChain::GetBuffer(
     _In_  REFIID riid,
     /* [annotation][out][in] */
     _COM_Outptr_  void **ppSurface) {
-    *ppSurface = resource_ptrs_[Buffer].get();
+    if (!ppSurface) {
+        return DXGI_ERROR_INVALID_CALL;
+    }
+
+    *ppSurface = buffer_.get();
 
     return S_OK;
 }
@@ -166,7 +163,12 @@ HRESULT STDMETHODCALLTYPE DXGISwapChain::GetFullscreenState(
 HRESULT STDMETHODCALLTYPE DXGISwapChain::GetDesc(
     /* [annotation][out] */
     _Out_  DXGI_SWAP_CHAIN_DESC *pDesc) {
-    assert(false && "Not implement!!!");
+    if (!pDesc) {
+        return DXGI_ERROR_INVALID_CALL;
+    }
+
+    *pDesc = desc_;
+
     return S_OK;
 }
 
@@ -178,7 +180,25 @@ HRESULT STDMETHODCALLTYPE DXGISwapChain::ResizeBuffers(
     /* [in] */ UINT Height,
     /* [in] */ DXGI_FORMAT NewFormat,
     /* [in] */ UINT SwapChainFlags) {
-    assert(false && "Not implement!!!");
+    if (desc_.BufferCount != BufferCount) {
+        layer_.maximumDrawableCount = BufferCount;
+
+        desc_.BufferCount = BufferCount;
+    }
+
+    if (desc_.BufferDesc.Width != Width || desc_.BufferDesc.Height != Height) {
+        layer_.drawableSize = CGSizeMake(Width, Height);
+
+        desc_.BufferDesc.Width = Width;
+        desc_.BufferDesc.Height = Height;
+    }
+
+    if (desc_.BufferDesc.Format != NewFormat) {
+        layer_.pixelFormat = ToPixelFormat(NewFormat);
+
+        desc_.BufferDesc.Format = NewFormat;
+    }
+
     return S_OK;
 }
 
@@ -187,7 +207,24 @@ HRESULT STDMETHODCALLTYPE DXGISwapChain::ResizeBuffers(
 HRESULT STDMETHODCALLTYPE DXGISwapChain::ResizeTarget(
     /* [annotation][in] */
     _In_  const DXGI_MODE_DESC *pNewTargetParameters) {
-    assert(false && "Not implement!!!");
+    if (desc_.BufferDesc.Width != pNewTargetParameters->Width ||
+        desc_.BufferDesc.Height != pNewTargetParameters->Height) {
+        layer_.drawableSize = CGSizeMake(pNewTargetParameters->Width, pNewTargetParameters->Height);
+
+        desc_.BufferDesc.Width = pNewTargetParameters->Width;
+        desc_.BufferDesc.Height = pNewTargetParameters->Height;
+    }
+
+    if (desc_.BufferDesc.Format != pNewTargetParameters->Format) {
+        layer_.pixelFormat = ToPixelFormat(desc_.BufferDesc.Format);
+
+        desc_.BufferDesc.Format = pNewTargetParameters->Format;
+    }
+
+    desc_.BufferDesc.RefreshRate = pNewTargetParameters->RefreshRate;
+    desc_.BufferDesc.ScanlineOrdering = pNewTargetParameters->ScanlineOrdering;
+    desc_.BufferDesc.Scaling = pNewTargetParameters->Scaling;
+
     return S_OK;
 }
 

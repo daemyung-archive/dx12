@@ -6,7 +6,7 @@
 #ifndef DX12_DXGI_SWAP_CHAIN_H_
 #define DX12_DXGI_SWAP_CHAIN_H_
 
-#include <vector>
+#include <memory>
 
 #include "dxgi.h"
 #include "dxgi_device_sub_object.h"
@@ -15,17 +15,14 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-class D3D12Device;
 class D3D12CommandQueue;
 
 //----------------------------------------------------------------------------------------------------------------------
 
 class DXGISwapChain : public IDXGISwapChain, public DXGIDeviceSubObject {
 public:
-    DXGISwapChain(
-        DXGIFactory* factory_ptr,
-        D3D12CommandQueue* command_queue_ptr,
-        const DXGI_SWAP_CHAIN_DESC* desc_ptr);
+    DXGISwapChain( DXGIFactory* factory, D3D12Device* device, D3D12CommandQueue* command_queue,
+        const DXGI_SWAP_CHAIN_DESC* desc);
 
     HRESULT STDMETHODCALLTYPE QueryInterface(
         REFIID riid,
@@ -120,10 +117,11 @@ public:
     id<CAMetalDrawable> GetDrawable() const;
 
 private:
-    D3D12CommandQueue* command_queue_ptr_ = { nullptr };
+    D3D12CommandQueue* command_queue_ = { nullptr };
+    DXGI_SWAP_CHAIN_DESC desc_;
     CAMetalLayer* layer_ = { nil };
     mutable id<CAMetalDrawable> drawable_ = { nil };
-    std::vector<std::unique_ptr<D3D12Resource>> resource_ptrs_;
+    std::unique_ptr<D3D12Resource> buffer_;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

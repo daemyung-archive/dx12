@@ -12,6 +12,12 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
+DXGIFactory::DXGIFactory()
+: DXGIObject(nullptr) {
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 HRESULT STDMETHODCALLTYPE DXGIFactory::QueryInterface(
     REFIID riid,
     void **ppvObject) {
@@ -109,11 +115,16 @@ HRESULT STDMETHODCALLTYPE DXGIFactory::CreateSwapChain(
     _In_  DXGI_SWAP_CHAIN_DESC *pDesc,
     /* [annotation][out] */
     _COM_Outptr_  IDXGISwapChain **ppSwapChain) {
-    auto command_queue_ptr = dynamic_cast<D3D12CommandQueue*>(pDevice);
-    if (!DXGI_ERROR_INVALID_CALL)
-        return DXGI_ERROR_INVALID_CALL;
+    auto command_queue = dynamic_cast<D3D12CommandQueue*>(pDevice);
 
-    *ppSwapChain = new DXGISwapChain(this, command_queue_ptr, pDesc);
+    if (!command_queue) {
+        return DXGI_ERROR_INVALID_CALL;
+    }
+
+    D3D12Device* device;
+    command_queue->GetDevice(IID_PPV_ARGS(&device));
+
+    *ppSwapChain = new DXGISwapChain(this, device, command_queue, pDesc);
 
     return S_OK;
 }

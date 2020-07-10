@@ -89,13 +89,16 @@ D3D12_COMMAND_LIST_TYPE STDMETHODCALLTYPE D3D12GraphicsCommandList::GetType( voi
 //----------------------------------------------------------------------------------------------------------------------
 
 HRESULT STDMETHODCALLTYPE D3D12GraphicsCommandList::Close( void) {
-    if (!GetCommandAllocator())
+    if (!GetCommandAllocator()) {
         return S_OK;
+    }
 
-    if (!render_command_encoder_)
+    if (!render_command_encoder_) {
         return E_FAIL;
+    }
 
     [render_command_encoder_ endEncoding];
+    render_command_encoder_= nil;
 
     return S_OK;
 }
@@ -431,6 +434,11 @@ void STDMETHODCALLTYPE D3D12GraphicsCommandList::OMSetRenderTargets(
     _In_opt_  const D3D12_CPU_DESCRIPTOR_HANDLE *pRenderTargetDescriptors,
     _In_  BOOL RTsSingleHandleToDescriptorRange,
     _In_opt_  const D3D12_CPU_DESCRIPTOR_HANDLE *pDepthStencilDescriptor) {
+    if (render_command_encoder_) {
+        [render_command_encoder_ endEncoding];
+        render_command_encoder_ = nil;
+    }
+
     auto descriptor = [MTLRenderPassDescriptor new];
 
     for (auto i = 0; i != NumRenderTargetDescriptors; ++i) {
@@ -456,9 +464,6 @@ void STDMETHODCALLTYPE D3D12GraphicsCommandList::OMSetRenderTargets(
 
     render_command_encoder_ = [command_buffer renderCommandEncoderWithDescriptor:descriptor];
     assert(render_command_encoder_);
-
-    [render_command_encoder_ endEncoding];
-    render_command_encoder_ = nil;
 }
 
 //----------------------------------------------------------------------------------------------------------------------

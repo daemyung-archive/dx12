@@ -11,13 +11,13 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-class DXGIFactory;
+class D3D12Device;
 
 //----------------------------------------------------------------------------------------------------------------------
 
 class DXGIDeviceSubObject : public IDXGIDeviceSubObject, public DXGIObject {
 public:
-    DXGIDeviceSubObject(DXGIFactory* factory_ptr);
+    DXGIDeviceSubObject(DXGIFactory* factory, D3D12Device* device);
 
     HRESULT STDMETHODCALLTYPE QueryInterface(
         REFIID riid,
@@ -60,8 +60,8 @@ public:
         /* [annotation][retval][out] */
         _COM_Outptr_  void **ppDevice) override;
 
-private:
-    DXGIFactory* factory_ptr_ = { nullptr };
+protected:
+    D3D12Device* device_ = { nullptr };
 };
 
 //----------------------------------------------------------------------------------------------------------------------

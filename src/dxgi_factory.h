@@ -11,6 +11,9 @@
 //----------------------------------------------------------------------------------------------------------------------
 
 class DXGIFactory : public IDXGIFactory, public DXGIObject {
+public:
+    DXGIFactory();
+
     HRESULT STDMETHODCALLTYPE QueryInterface(
         REFIID riid,
         void **ppvObject) override;

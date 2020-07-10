@@ -13,6 +13,18 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
+inline auto ToWindow(HWND window) {
+    return (__bridge NSWindow*)window;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+inline auto IsFramebufferOnly(DXGI_USAGE usage) {
+    return usage == DXGI_USAGE_RENDER_TARGET_OUTPUT;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 inline auto ToPixelFormat(DXGI_FORMAT format) {
     switch (format) {
         case DXGI_FORMAT_R8G8B8A8_UNORM:

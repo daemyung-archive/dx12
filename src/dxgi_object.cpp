@@ -9,6 +9,12 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
+DXGIObject::DXGIObject(DXGIFactory* factory)
+: factory_(factory) {
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 HRESULT STDMETHODCALLTYPE DXGIObject::QueryInterface(
     REFIID riid,
     void **ppvObject) {

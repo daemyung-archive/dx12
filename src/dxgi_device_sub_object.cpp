@@ -9,8 +9,8 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-DXGIDeviceSubObject::DXGIDeviceSubObject(DXGIFactory* factory_ptr)
-: factory_ptr_(factory_ptr_) {
+DXGIDeviceSubObject::DXGIDeviceSubObject(DXGIFactory* factory, D3D12Device* device)
+: DXGIObject(factory), device_(device) {
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -83,7 +83,7 @@ HRESULT STDMETHODCALLTYPE DXGIDeviceSubObject::GetDevice(
     _In_  REFIID riid,
     /* [annotation][retval][out] */
     _COM_Outptr_  void **ppDevice) {
-    *ppDevice = static_cast<void*>(factory_ptr_);
+    *ppDevice = static_cast<void*>(device_);
     return S_OK;
 }
 

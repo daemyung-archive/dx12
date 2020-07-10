@@ -11,8 +11,14 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
+class DXGIFactory;
+
+//----------------------------------------------------------------------------------------------------------------------
+
 class DXGIObject : public IDXGIObject, public Unknown {
 public:
+    explicit DXGIObject(DXGIFactory* factory);
+
     HRESULT STDMETHODCALLTYPE QueryInterface(
         REFIID riid,
         void **ppvObject) override;
@@ -47,6 +53,9 @@ public:
         _In_  REFIID riid,
         /* [annotation][retval][out] */
         _COM_Outptr_  void **ppParent) override;
+
+protected:
+    DXGIFactory* factory_ = { nullptr };
 };
 
 //----------------------------------------------------------------------------------------------------------------------
