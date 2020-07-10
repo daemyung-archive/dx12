@@ -13,6 +13,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <cstdlib>
 #include <cwchar>
 #include <cstring>
 #include <objc/objc.h>
@@ -64,8 +65,10 @@ using LPCWSTR  = const wchar_t*;
 
 using HRESULT = int64_t;
 
-#define S_OK   ((HRESULT)0x00000000L)
-#define E_FAIL ((HRESULT)0x80004005)
+#define S_OK          ((HRESULT)0x00000000L)
+#define E_FAIL        ((HRESULT)0x80004005)
+#define E_INVALIDARG  ((HRESULT)0x80070057)
+#define E_OUTOFMEMORY ((HRESULT)0x8007000E)
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -96,7 +99,8 @@ using HRESULT = int64_t;
 
 //----------------------------------------------------------------------------------------------------------------------
 
-#define FAILED(hr) (((HRESULT)(hr)) < 0)
+#define SUCCEEDED(hr) (((HRESULT)(hr)) >= 0)
+#define FAILED(hr)    (((HRESULT)(hr)) < 0)
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -181,6 +185,7 @@ struct RECT {
 #define DECLSPEC_NOVTABLE
 #define DECLSPEC_SELECTANY __attribute__((weak))
 #define DECLSPEC_UUID(x)
+#define DECLSPEC_ALLOCATOR
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -293,9 +298,14 @@ IUnknown
 #define _Field_size_full_(s)
 #define _Field_size_bytes_full_(s)
 #define _Field_size_bytes_full_opt_(s)
+#define _Frees_ptr_opt_
 #define _COM_Outptr_
 #define _COM_Outptr_opt_
 #define _COM_Outptr_opt_result_maybenull_
+
+//----------------------------------------------------------------------------------------------------------------------
+
+#define __analysis_assume(x)
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -303,6 +313,30 @@ inline void ZeroMemory(
     _In_  PVOID  Destination,
     _In_  SIZE_T Length) {
     memset(Destination, 0, Length);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+inline HANDLE GetProcessHeap() {
+    return 0;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+inline DECLSPEC_ALLOCATOR LPVOID HeapAlloc(
+    HANDLE hHeap,
+    DWORD dwFlags,
+    SIZE_T dwBytes) {
+    return malloc(dwBytes);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+inline BOOL HeapFree(
+    HANDLE hHeap,
+    DWORD dwFlags,
+    _Frees_ptr_opt_ LPVOID lpMem) {
+    free(lpMem);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
