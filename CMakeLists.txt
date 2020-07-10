@@ -12,11 +12,11 @@ option(BUILD_TEST "build dx12 test" ON)
 add_library(dx12
 STATIC
     include/glue.h
+    include/unknown.h
     include/dxgi.h
     include/d3d12.h
     src/metal_library.h
     src/metal_helper.h
-    src/unknown.h
     src/unknown.cpp
     src/dxgi.cpp
     src/dxgi_object.h

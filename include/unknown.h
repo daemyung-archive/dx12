@@ -14,6 +14,8 @@
 
 class Unknown : public IUnknown {
 public:
+    virtual ~Unknown() = default;
+
     HRESULT STDMETHODCALLTYPE QueryInterface(
         REFIID riid,
         void **ppvObject) override;
