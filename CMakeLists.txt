@@ -79,6 +79,11 @@ find_package(glfw3 CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 
 add_executable(dx12_demo
+    demo/d3dx12.h
+    demo/app.h
+    demo/app.cpp
+    demo/clear_rtv_app.h
+    demo/clear_rtv_app.cpp
     demo/main.cpp
 )
 
@@ -87,6 +92,11 @@ PRIVATE
     dx12
     spdlog::spdlog
     glfw
+)
+
+set_target_properties(dx12_demo
+PROPERTIES
+    CXX_STANDARD 17
 )
 
 endif()
