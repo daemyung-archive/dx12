@@ -21,7 +21,7 @@ void ClearRTVApp::OnRender(double delta_time) {
     result = command_allocator_->Reset();
     assert(SUCCEEDED(result));
 
-    result = command_list_->Reset(command_allocator_, nullptr);
+    result = command_list_->Reset(command_allocator_.Get(), nullptr);
     assert(SUCCEEDED(result));
 
     {
@@ -52,7 +52,7 @@ void ClearRTVApp::OnRender(double delta_time) {
     result = command_list_->Close();
     assert(SUCCEEDED(result));
 
-    ID3D12CommandList* command_lists[] = { command_list_ };
+    ID3D12CommandList* command_lists[] = { command_list_.Get() };
     command_queue_->ExecuteCommandLists(_countof(command_lists), command_lists);
 
     result = swap_chain_->Present(0, 0);

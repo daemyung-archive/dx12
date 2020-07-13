@@ -25,7 +25,7 @@ public:
     ULONG STDMETHODCALLTYPE Release( void) override;
 
 private:
-    std::atomic<uint64_t> count_ = { 0 };
+    std::atomic<uint64_t> count_ = { 1 };
 };
 
 //----------------------------------------------------------------------------------------------------------------------

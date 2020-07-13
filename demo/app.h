@@ -9,6 +9,7 @@
 #include <GLFW/glfw3.h>
 #include <dxgi.h>
 #include <d3d12.h>
+#include <wrl.h>
 #include "d3dx12.h"
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -48,15 +49,15 @@ private:
 
 protected:
     GLFWwindow* window_ = { nullptr };
-    IDXGIFactory* factory_ = { nullptr };
-    ID3D12Device* device_ = { nullptr };
+    ComPtr<IDXGIFactory> factory_ = { nullptr };
+    ComPtr<ID3D12Device> device_ = { nullptr };
     UINT descriptor_inc_sizes_[D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES];
-    ID3D12DescriptorHeap* descriptor_heaps_[D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES];
-    ID3D12CommandQueue* command_queue_ = { nullptr };
-    ID3D12CommandAllocator* command_allocator_ = { nullptr };
-    ID3D12GraphicsCommandList* command_list_ = { nullptr };
-    IDXGISwapChain* swap_chain_ = { nullptr };
-    ID3D12Resource* back_buffers_[kBackBufferCount];
+    ComPtr<ID3D12DescriptorHeap> descriptor_heaps_[D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES];
+    ComPtr<ID3D12CommandQueue> command_queue_ = { nullptr };
+    ComPtr<ID3D12CommandAllocator> command_allocator_ = { nullptr };
+    ComPtr<ID3D12GraphicsCommandList> command_list_ = { nullptr };
+    ComPtr<IDXGISwapChain> swap_chain_ = { nullptr };
+    ComPtr<ID3D12Resource> back_buffers_[kBackBufferCount];
     UINT back_buffer_index_ = { 0 };
     D3D12_VIEWPORT window_viewport_;
     D3D12_RECT window_scissor_rect_;

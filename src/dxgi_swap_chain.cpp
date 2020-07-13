@@ -132,6 +132,7 @@ HRESULT STDMETHODCALLTYPE DXGISwapChain::GetBuffer(
         return DXGI_ERROR_INVALID_CALL;
     }
 
+    buffer_->AddRef();
     *ppSurface = buffer_.get();
 
     return S_OK;

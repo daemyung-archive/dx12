@@ -8,7 +8,7 @@
 
 * [ ] DirectX Graphics Infrastructure
 * [ ] DirectX 12
-* [ ] ComPtr
+* [X] COM Smart Pointer
 
 ## Requirements
 

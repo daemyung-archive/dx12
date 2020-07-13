@@ -51,7 +51,7 @@ void App::OnResize() {
         result = swap_chain_->GetBuffer(i, IID_PPV_ARGS(&back_buffers_[i]));
         assert(SUCCEEDED(result));
 
-        device_->CreateRenderTargetView(back_buffers_[i], nullptr, rtv_descriptor);
+        device_->CreateRenderTargetView(back_buffers_[i].Get(), nullptr, rtv_descriptor);
         rtv_descriptor.Offset(1, descriptor_inc_sizes_[D3D12_DESCRIPTOR_HEAP_TYPE_RTV]);
     }
 
@@ -110,7 +110,7 @@ void App::CreateDescriptorHeaps() {
 //----------------------------------------------------------------------------------------------------------------------
 
 ID3D12Resource* App::GetCurrentBackBuffer() const {
-    return back_buffers_[back_buffer_index_];
+    return back_buffers_[back_buffer_index_].Get();
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -161,7 +161,7 @@ void App::CreateCommandObjects() {
     assert(SUCCEEDED(result));
 
     result = device_->CreateCommandList(
-        0, D3D12_COMMAND_LIST_TYPE_DIRECT, command_allocator_, nullptr,
+        0, D3D12_COMMAND_LIST_TYPE_DIRECT, command_allocator_.Get(), nullptr,
         IID_PPV_ARGS(&command_list_));
     assert(SUCCEEDED(result));
 
@@ -201,7 +201,7 @@ void App::CreateSwapChain() {
         .Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH
     };
 
-    result = factory_->CreateSwapChain(command_queue_, &swap_chain_desc, &swap_chain_);
+    result = factory_->CreateSwapChain(command_queue_.Get(), &swap_chain_desc, &swap_chain_);
     assert(SUCCEEDED(result));
 }
 

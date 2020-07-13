@@ -15,6 +15,7 @@ STATIC
     include/unknown.h
     include/dxgi.h
     include/d3d12.h
+    include/wrl.h
     src/metal_library.h
     src/metal_helper.h
     src/unknown.cpp
