@@ -491,6 +491,18 @@ void STDMETHODCALLTYPE D3D12GraphicsCommandList::OMSetRenderTargets(
 
     render_command_encoder_ = [command_buffer renderCommandEncoderWithDescriptor:descriptor];
     assert(render_command_encoder_);
+
+    if (!viewports_.empty()) {
+        [render_command_encoder_ setViewports:viewports_.data()
+                                        count:viewports_.size()];
+        viewports_.clear();
+    }
+
+    if (!scissor_rects_.empty()) {
+        [render_command_encoder_ setScissorRects:scissor_rects_.data()
+                                           count:scissor_rects_.size()];
+        scissor_rects_.clear();
+    }
 }
 
 //----------------------------------------------------------------------------------------------------------------------
