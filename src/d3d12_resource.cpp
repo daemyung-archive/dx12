@@ -8,17 +8,48 @@
 #include <cassert>
 
 #include "dxgi_swap_chain.h"
+#include "d3d12_device.h"
+#include "metal_helper.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 
-D3D12Resource::D3D12Resource(D3D12Device* device_ptr)
-: D3D12Pageable(device_ptr) {
+D3D12Resource::D3D12Resource(D3D12Device* device, const D3D12_HEAP_PROPERTIES* heap_properties,
+    D3D12_HEAP_FLAGS heap_flags, const D3D12_RESOURCE_DESC* desc, const D3D12_CLEAR_VALUE *clear_value)
+: D3D12Pageable(device), heap_properties_(*heap_properties), heap_flags_(heap_flags), desc_(*desc) {
+    if (desc_.Dimension == D3D12_RESOURCE_DIMENSION_BUFFER) {
+        assert(false && "Not implement!!!");
+    }
+    else {
+        auto descriptor = [MTLTextureDescriptor new];
+        descriptor.textureType = ToTextureType(desc_.Dimension,
+            desc_.DepthOrArraySize, desc_.SampleDesc.Count != 1);
+        descriptor.pixelFormat = ToPixelFormat(desc_.Format);
+        descriptor.width = desc_.Width;
+        descriptor.height = desc_.Height;
+        descriptor.depth = (desc_.Dimension == D3D12_RESOURCE_DIMENSION_TEXTURE3D)
+            ? desc_.DepthOrArraySize : 1;
+        descriptor.mipmapLevelCount = desc_.MipLevels;
+        descriptor.sampleCount = desc_.SampleDesc.Count;
+        descriptor.arrayLength = (desc_.Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE3D)
+            ? desc_.DepthOrArraySize : 1;
+        descriptor.allowGPUOptimizedContents = (desc_.Layout == D3D12_TEXTURE_LAYOUT_UNKNOWN)
+            ? YES : NO;
+        descriptor.resourceOptions = ToResourceStorageMode(heap_properties_.Type);
+        descriptor.usage = ToTextureUsage(desc_.Flags);
+
+        texture_ = [device_->GetDevice() newTextureWithDescriptor:descriptor];
+        assert(texture_);
+
+        if (clear_value) {
+            
+        }
+    }
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
-D3D12Resource::D3D12Resource(D3D12Device* device_ptr, DXGISwapChain* swap_chain_ptr)
-: D3D12Pageable(device_ptr), swap_chain_ptr_(swap_chain_ptr) {
+D3D12Resource::D3D12Resource(D3D12Device* device, DXGISwapChain* swap_chain)
+: D3D12Pageable(device), swap_chain_ptr_(swap_chain) {
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -104,8 +135,7 @@ void STDMETHODCALLTYPE D3D12Resource::Unmap(
 //----------------------------------------------------------------------------------------------------------------------
 
 D3D12_RESOURCE_DESC STDMETHODCALLTYPE D3D12Resource::GetDesc( void) {
-    assert(false && "Not implement!!!");
-    return D3D12_RESOURCE_DESC();
+    return desc_;
 }
 
 //----------------------------------------------------------------------------------------------------------------------

@@ -7,8 +7,8 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-D3D12DeviceChild::D3D12DeviceChild(D3D12Device* device_ptr)
-: device_ptr_(device_ptr) {
+D3D12DeviceChild::D3D12DeviceChild(D3D12Device* device)
+: device_(device) {
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -69,7 +69,7 @@ HRESULT STDMETHODCALLTYPE D3D12DeviceChild::SetName(
 HRESULT STDMETHODCALLTYPE D3D12DeviceChild::GetDevice(
     REFIID riid,
     _COM_Outptr_opt_  void **ppvDevice) {
-    *ppvDevice = device_ptr_;
+    *ppvDevice = device_;
     return S_OK;
 }
 

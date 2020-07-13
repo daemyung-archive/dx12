@@ -13,7 +13,7 @@
 
 D3D12CommandAllocator::D3D12CommandAllocator(D3D12Device* device_ptr)
 : D3D12Pageable(device_ptr) {
-    auto command_queue = device_ptr_->GetCommandQueue();
+    auto command_queue = device_->GetCommandQueue();
     assert(command_queue);
 
     command_buffer_ = [command_queue commandBuffer];
@@ -87,7 +87,7 @@ HRESULT STDMETHODCALLTYPE D3D12CommandAllocator::Reset( void) {
     if (!command_buffer_)
         return E_FAIL;
 
-    auto command_queue = device_ptr_->GetCommandQueue();
+    auto command_queue = device_->GetCommandQueue();
     assert(command_queue);
 
     command_buffer_ = [command_queue commandBuffer];

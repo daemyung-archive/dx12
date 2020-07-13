@@ -442,21 +442,48 @@ void STDMETHODCALLTYPE D3D12GraphicsCommandList::OMSetRenderTargets(
     auto descriptor = [MTLRenderPassDescriptor new];
 
     for (auto i = 0; i != NumRenderTargetDescriptors; ++i) {
-        auto resouce_ptr = ToResourcePtr(pRenderTargetDescriptors[i]);
-        assert(resouce_ptr);
+        auto resource = ToResource(pRenderTargetDescriptors[i]);
+        assert(resource);
 
-        descriptor.colorAttachments[i].texture = resouce_ptr->GetTexture();
+        descriptor.colorAttachments[i].texture = resource->GetTexture();
+        descriptor.colorAttachments[i].storeAction = MTLStoreActionStore;
 
-        auto iter = clear_colors_.find(resouce_ptr);
-        if (iter != std::end(clear_colors_)) {
+        if (clear_colors_.find(resource) != std::end(clear_colors_)) {
             descriptor.colorAttachments[i].loadAction = MTLLoadActionClear;
-            descriptor.colorAttachments[i].clearColor = iter->second;
-            clear_colors_.erase(iter);
+            descriptor.colorAttachments[i].clearColor = clear_colors_[resource];
+            clear_colors_.erase(resource);
         } else {
             descriptor.colorAttachments[i].loadAction = MTLLoadActionLoad;
         }
+    }
 
-        descriptor.colorAttachments[i].storeAction = MTLStoreActionStore;
+    if (pDepthStencilDescriptor) {
+        auto resource = ToResource(*pDepthStencilDescriptor);
+        assert(resource);
+
+        descriptor.depthAttachment.texture = resource->GetTexture();
+        descriptor.depthAttachment.storeAction = MTLStoreActionStore;
+
+        if (clear_depths_.find(resource) != std::end(clear_depths_)) {
+            descriptor.depthAttachment.loadAction = MTLLoadActionClear;
+            descriptor.depthAttachment.clearDepth = clear_depths_[resource];
+            clear_depths_.erase(resource);
+
+        } else {
+            descriptor.depthAttachment.loadAction = MTLLoadActionLoad;
+        }
+
+        descriptor.stencilAttachment.texture = resource->GetTexture();
+        descriptor.stencilAttachment.storeAction = MTLStoreActionStore;
+
+        if (clear_stencils_.find(resource) != std::end(clear_stencils_)) {
+            descriptor.stencilAttachment.loadAction = MTLLoadActionClear;
+            descriptor.stencilAttachment.clearStencil = clear_stencils_[resource];
+            clear_stencils_.erase(resource);
+
+        } else {
+            descriptor.stencilAttachment.loadAction = MTLLoadActionLoad;
+        }
     }
 
     auto command_buffer = command_allocator_ptr_->GetCommandBuffer();
@@ -475,7 +502,16 @@ void STDMETHODCALLTYPE D3D12GraphicsCommandList::ClearDepthStencilView(
     _In_  UINT8 Stencil,
     _In_  UINT NumRects,
     _In_reads_(NumRects)  const D3D12_RECT *pRects) {
-    assert(false && "Not implement!!!");
+    auto resource = ToResource(DepthStencilView);
+    assert(resource);
+
+    if (ClearFlags & D3D12_CLEAR_FLAG_DEPTH) {
+        clear_depths_[resource] = Depth;
+    }
+
+    if (ClearFlags & D3D12_CLEAR_FLAG_STENCIL) {
+        clear_stencils_[resource] = Stencil;
+    }
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -485,7 +521,7 @@ void STDMETHODCALLTYPE D3D12GraphicsCommandList::ClearRenderTargetView(
     _In_  const FLOAT ColorRGBA[ 4 ],
     _In_  UINT NumRects,
     _In_reads_(NumRects)  const D3D12_RECT *pRects) {
-    clear_colors_[ToResourcePtr(RenderTargetView)] = ToClearColor(ColorRGBA);
+    clear_colors_[ToResource(RenderTargetView)] = ToClearColor(ColorRGBA);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

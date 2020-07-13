@@ -305,6 +305,8 @@ public:
 private:
     id<MTLRenderCommandEncoder> render_command_encoder_ = { nil };
     std::unordered_map<D3D12Resource*, MTLClearColor> clear_colors_;
+    std::unordered_map<D3D12Resource*, float> clear_depths_;
+    std::unordered_map<D3D12Resource*, uint8_t> clear_stencils_;
     std::vector<MTLViewport> viewports_;
     std::vector<MTLScissorRect> scissor_rects_;
 };

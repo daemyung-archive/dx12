@@ -18,9 +18,10 @@ class DXGISwapChain;
 
 class D3D12Resource : public ID3D12Resource, public D3D12Pageable {
 public:
-    D3D12Resource(D3D12Device* device_ptr);
+    D3D12Resource(D3D12Device* device, const D3D12_HEAP_PROPERTIES* heap_properties,
+        D3D12_HEAP_FLAGS heap_flags, const D3D12_RESOURCE_DESC* desc, const D3D12_CLEAR_VALUE *clear_value);
 
-    D3D12Resource(D3D12Device* device_ptr, DXGISwapChain* swap_chain_ptr);
+    D3D12Resource(D3D12Device* device, DXGISwapChain* swap_chain);
 
     HRESULT STDMETHODCALLTYPE QueryInterface(
         REFIID riid,
@@ -85,6 +86,9 @@ public:
     id<MTLTexture> GetTexture() const;
 
 private:
+    D3D12_HEAP_PROPERTIES heap_properties_;
+    D3D12_HEAP_FLAGS heap_flags_;
+    D3D12_RESOURCE_DESC desc_;
     id<MTLTexture> texture_ = { nil };
     DXGISwapChain* swap_chain_ptr_ = { nil };
 };

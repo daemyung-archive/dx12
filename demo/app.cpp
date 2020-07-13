@@ -35,6 +35,9 @@ void App::OnResize() {
 
     FlushCommandQueue();
 
+    result = command_list_->Reset(command_allocator_.Get(), nullptr);
+    assert(SUCCEEDED(result));
+
     int width, height;
     glfwGetWindowSize(window_, &width, &height);
 
@@ -54,6 +57,53 @@ void App::OnResize() {
         device_->CreateRenderTargetView(back_buffers_[i].Get(), nullptr, rtv_descriptor);
         rtv_descriptor.Offset(1, descriptor_inc_sizes_[D3D12_DESCRIPTOR_HEAP_TYPE_RTV]);
     }
+
+    CD3DX12_HEAP_PROPERTIES heap_properties(D3D12_HEAP_TYPE_DEFAULT);
+
+    D3D12_RESOURCE_DESC depth_stencil_desc = {
+        .Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D,
+        .Width = static_cast<UINT64>(width),
+        .Height = static_cast<UINT>(height),
+        .DepthOrArraySize = 1,
+        .MipLevels = 1,
+        .Format = DXGI_FORMAT_D24_UNORM_S8_UINT,
+        .SampleDesc = {
+            .Count = 1,
+            .Quality = 0
+        },
+        .Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN,
+        .Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL
+    };
+
+    result = device_->CreateCommittedResource(&heap_properties, D3D12_HEAP_FLAG_NONE,
+        &depth_stencil_desc, D3D12_RESOURCE_STATE_COMMON, nullptr, IID_PPV_ARGS(&depth_stencil_buffer_));
+    assert(SUCCEEDED(result));
+
+    D3D12_DEPTH_STENCIL_VIEW_DESC dsv_desc = {
+        .Format = DXGI_FORMAT_D24_UNORM_S8_UINT,
+        .ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D,
+        .Flags = D3D12_DSV_FLAG_NONE,
+        .Texture2D = {
+            .MipSlice = 0
+        }
+    };
+
+    device_->CreateDepthStencilView(depth_stencil_buffer_.Get(), &dsv_desc, GetDepthStencilView());
+
+    {
+        auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(depth_stencil_buffer_.Get(),
+            D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+
+        command_list_->ResourceBarrier(1, &barrier);
+    }
+
+    result = command_list_->Close();
+    assert(SUCCEEDED(result));
+
+    ID3D12CommandList* command_lists[] = { command_list_.Get() };
+    command_queue_->ExecuteCommandLists(_countof(command_lists), command_lists);
+
+    FlushCommandQueue();
 
     window_viewport_.TopLeftX = 0;
     window_viewport_.TopLeftY = 0;
@@ -115,11 +165,18 @@ ID3D12Resource* App::GetCurrentBackBuffer() const {
 
 //----------------------------------------------------------------------------------------------------------------------
 
-D3D12_CPU_DESCRIPTOR_HANDLE App::GetCurrentBackBuferView() const {
+CD3DX12_CPU_DESCRIPTOR_HANDLE App::GetCurrentBackBuferView() const {
     return CD3DX12_CPU_DESCRIPTOR_HANDLE(
         descriptor_heaps_[D3D12_DESCRIPTOR_HEAP_TYPE_RTV]->GetCPUDescriptorHandleForHeapStart(),
         back_buffer_index_,
         descriptor_inc_sizes_[D3D12_DESCRIPTOR_HEAP_TYPE_RTV]);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+CD3DX12_CPU_DESCRIPTOR_HANDLE App::GetDepthStencilView() const {
+    return CD3DX12_CPU_DESCRIPTOR_HANDLE(
+        descriptor_heaps_[D3D12_DESCRIPTOR_HEAP_TYPE_DSV]->GetCPUDescriptorHandleForHeapStart());
 }
 
 //----------------------------------------------------------------------------------------------------------------------

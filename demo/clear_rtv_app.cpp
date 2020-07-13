@@ -36,10 +36,13 @@ void ClearRTVApp::OnRender(double delta_time) {
     command_list_->RSSetScissorRects(1, &window_scissor_rect_);
 
     auto back_buffer_view = GetCurrentBackBuferView();
+    auto depth_stencil_view = GetDepthStencilView();
 
     FLOAT clear_color[4] = { 0.2f, 0.2f, 0.8f, 1.0f };
     command_list_->ClearRenderTargetView(back_buffer_view, clear_color, 0, nullptr);
-    command_list_->OMSetRenderTargets(1, &back_buffer_view, true, nullptr);
+    command_list_->ClearDepthStencilView(depth_stencil_view,
+        D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
+    command_list_->OMSetRenderTargets(1, &back_buffer_view, true, &depth_stencil_view);
 
     {
         auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(

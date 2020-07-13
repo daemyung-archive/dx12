@@ -14,7 +14,7 @@ class D3D12Resource;
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline auto ToResourcePtr(D3D12_CPU_DESCRIPTOR_HANDLE handle) {
+inline auto ToResource(D3D12_CPU_DESCRIPTOR_HANDLE handle) {
     return *reinterpret_cast<D3D12Resource**>(handle.ptr);
 }
 

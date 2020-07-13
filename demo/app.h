@@ -38,7 +38,9 @@ protected:
 
     ID3D12Resource* GetCurrentBackBuffer() const;
 
-    D3D12_CPU_DESCRIPTOR_HANDLE GetCurrentBackBuferView() const;
+    CD3DX12_CPU_DESCRIPTOR_HANDLE GetCurrentBackBuferView() const;
+
+    CD3DX12_CPU_DESCRIPTOR_HANDLE GetDepthStencilView() const;
 
 private:
     void InitD3D12();
@@ -59,6 +61,7 @@ protected:
     ComPtr<IDXGISwapChain> swap_chain_ = { nullptr };
     ComPtr<ID3D12Resource> back_buffers_[kBackBufferCount];
     UINT back_buffer_index_ = { 0 };
+    ComPtr<ID3D12Resource> depth_stencil_buffer_ = { nullptr };
     D3D12_VIEWPORT window_viewport_;
     D3D12_RECT window_scissor_rect_;
 };

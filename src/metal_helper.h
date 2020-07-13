@@ -31,6 +31,8 @@ inline auto ToPixelFormat(DXGI_FORMAT format) {
             return MTLPixelFormatRGBA8Unorm;
         case DXGI_FORMAT_B8G8R8A8_UNORM:
             return MTLPixelFormatBGRA8Unorm;
+        case DXGI_FORMAT_D24_UNORM_S8_UINT:
+            return MTLPixelFormatDepth24Unorm_Stencil8;
         default:
             throw std::runtime_error("invalid format");
     }
@@ -64,6 +66,60 @@ inline auto ToScissorRect(const D3D12_RECT& rect) {
 
 inline auto ToClearColor(const FLOAT color[4]) {
     return MTLClearColorMake(color[0], color[1], color[2], color[3]);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+inline auto ToTextureType(D3D12_RESOURCE_DIMENSION dimension, bool is_array, bool is_multisample) {
+    switch (dimension) {
+        case D3D12_RESOURCE_DIMENSION_TEXTURE1D:
+            return !is_array ? MTLTextureType1D : MTLTextureType1DArray;
+        case D3D12_RESOURCE_DIMENSION_TEXTURE2D:
+            if (!is_multisample) {
+                return !is_array ? MTLTextureType2D : MTLTextureType2DArray;
+            } else {
+                return !is_array ? MTLTextureType2DMultisample : MTLTextureType2DMultisampleArray;
+            }
+        case D3D12_RESOURCE_DIMENSION_TEXTURE3D:
+            return MTLTextureType3D;
+        default:
+            throw std::runtime_error("invalid dimension");
+    }
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+inline auto ToResourceStorageMode(D3D12_HEAP_TYPE type) {
+    switch (type) {
+        case D3D12_HEAP_TYPE_DEFAULT:
+            return MTLResourceStorageModePrivate;
+        case D3D12_HEAP_TYPE_UPLOAD:
+        case D3D12_HEAP_TYPE_READBACK:
+            return MTLResourceStorageModeShared;
+        default:
+            throw std::runtime_error("invalid dimension");
+    }
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+inline auto ToTextureUsage(D3D12_RESOURCE_FLAGS flags) {
+    MTLTextureUsage usage = MTLTextureUsageShaderRead;
+
+    if (flags & D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET ||
+        flags & D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL) {
+        usage |= MTLTextureUsageRenderTarget;
+    }
+
+    if (flags & D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS) {
+        usage |= MTLTextureUsageShaderWrite;
+    }
+
+    if (flags & D3D12_RESOURCE_FLAG_DENY_SHADER_RESOURCE) {
+        usage &= ~MTLTextureUsageShaderRead;
+    }
+
+    return usage;
 }
 
 //----------------------------------------------------------------------------------------------------------------------

@@ -235,7 +235,8 @@ void STDMETHODCALLTYPE D3D12Device::CreateDepthStencilView(
     _In_opt_  ID3D12Resource *pResource,
     _In_opt_  const D3D12_DEPTH_STENCIL_VIEW_DESC *pDesc,
     _In_  D3D12_CPU_DESCRIPTOR_HANDLE DestDescriptor) {
-    assert(false && "Not implement!!!");
+    memcpy(reinterpret_cast<void**>(DestDescriptor.ptr), &pResource, sizeof(D3D12Resource*));
+    
     return S_OK;
 }
 
@@ -302,7 +303,9 @@ HRESULT STDMETHODCALLTYPE D3D12Device::CreateCommittedResource(
     _In_opt_  const D3D12_CLEAR_VALUE *pOptimizedClearValue,
     REFIID riidResource,
     _COM_Outptr_opt_  void **ppvResource) {
-    assert(false && "Not implement!!!");
+    *ppvResource = new D3D12Resource(this, pHeapProperties, HeapFlags, pDesc, pOptimizedClearValue);
+    assert(*ppvResource);
+
     return S_OK;
 }
 
