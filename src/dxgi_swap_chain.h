@@ -21,7 +21,7 @@ class D3D12CommandQueue;
 
 class DXGISwapChain : public IDXGISwapChain, public DXGIDeviceSubObject {
 public:
-    DXGISwapChain( DXGIFactory* factory, D3D12Device* device, D3D12CommandQueue* command_queue,
+    DXGISwapChain(DXGIFactory* factory, D3D12Device* device, D3D12CommandQueue* command_queue,
         const DXGI_SWAP_CHAIN_DESC* desc);
 
     HRESULT STDMETHODCALLTYPE QueryInterface(

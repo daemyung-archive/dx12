@@ -9,17 +9,29 @@ project(dx12 VERSION 0.1.0 LANGUAGES CXX)
 option(BUILD_DEMO "build dx12 demo" ON)
 option(BUILD_TEST "build dx12 test" ON)
 
+find_package(fmt CONFIG REQUIRED)
+find_package(glslang CONFIG REQUIRED)
+find_package(SPIRV-Tools CONFIG REQUIRED)
+find_package(spirv_cross_core CONFIG REQUIRED)
+find_package(spirv_cross_glsl CONFIG REQUIRED)
+find_package(spirv_cross_msl CONFIG REQUIRED)
+
 add_library(dx12
 STATIC
     include/glue.h
     include/unknown.h
     include/dxgi.h
+    include/d3dcommon.h
     include/d3d12.h
+    include/d3d12shader.h
+    include/d3dcompiler.h
     include/wrl.h
     src/metal_library.h
     src/metal_helper.h
     src/unknown.cpp
     src/dxgi.cpp
+    src/d3d12.cpp
+    src/d3dcompiler.cpp
     src/dxgi_object.h
     src/dxgi_object.cpp
     src/dxgi_factory.h
@@ -29,7 +41,6 @@ STATIC
     src/dxgi_swap_chain.h
     src/dxgi_swap_chain.cpp
     src/d3d12_helper.h
-    src/d3d12.cpp
     src/d3d12_object.h
     src/d3d12_object.cpp
     src/d3d12_device.h
@@ -50,6 +61,10 @@ STATIC
     src/d3d12_descriptor_heap.cpp
     src/d3d12_resource.h
     src/d3d12_resource.cpp
+    src/d3d_blob.h
+    src/d3d_blob.cpp
+    src/d3d_compiler.h
+    src/d3d_compiler.cpp
 )
 
 target_include_directories(dx12
@@ -66,6 +81,15 @@ target_link_libraries(dx12
 PUBLIC
     "-framework QuartzCore"
     "-framework Metal"
+    fmt::fmt
+    glslang::HLSL
+    glslang::SPIRV
+    glslang::glslang
+    glslang::OGLCompiler
+    SPIRV-Tools
+    spirv-cross-core
+    spirv-cross-glsl
+    spirv-cross-msl
 )
 
 set_target_properties(dx12

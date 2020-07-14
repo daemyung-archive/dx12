@@ -20,8 +20,12 @@
 ### Install dependencies
 
 ```
-vcpkg install glfw3:x64-windows
-vcpkg install spdlog:x64-windows
+vcpkg install fmt
+vcpkg install glslang
+vcpkg install spirv-tools
+vcpkg install spirv-cross
+vcpkg install glfw3
+vcpkg install spdlog
 ```
 
 ### Generate Project Files

@@ -7,6 +7,7 @@
 #define GLFW_EXPOSE_NATIVE_COCOA
 #endif
 
+#include <iostream>
 #include <GLFW/glfw3.h>
 #include <GLFW/glfw3native.h>
 
@@ -260,6 +261,25 @@ void App::CreateSwapChain() {
 
     result = factory_->CreateSwapChain(command_queue_.Get(), &swap_chain_desc, &swap_chain_);
     assert(SUCCEEDED(result));
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+HRESULT CompileShader(const std::wstring& file_name, const D3D_SHADER_MACRO* defines,
+    const std::string& entrypoint, const std::string& target, ID3DBlob** code) {
+    HRESULT result = S_OK;
+
+    ComPtr<ID3DBlob> error;
+    result = D3DCompileFromFile(&file_name[0], defines, D3D_COMPILE_STANDARD_FILE_INCLUDE,
+        entrypoint.c_str(), target.c_str(), 0, 0, code, &error);
+
+    if (error != nullptr) {
+        std::cerr << static_cast<char*>(error->GetBufferPointer()) << std::endl;
+    }
+
+    assert(SUCCEEDED(result));
+
+    return result;
 }
 
 //----------------------------------------------------------------------------------------------------------------------

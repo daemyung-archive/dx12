@@ -6,9 +6,11 @@
 #ifndef DX12_DEMO_APP_H_
 #define DX12_DEMO_APP_H_
 
+#include <string>
 #include <GLFW/glfw3.h>
 #include <dxgi.h>
 #include <d3d12.h>
+#include <d3dcompiler.h>
 #include <wrl.h>
 #include "d3dx12.h"
 
@@ -65,6 +67,11 @@ protected:
     D3D12_VIEWPORT window_viewport_;
     D3D12_RECT window_scissor_rect_;
 };
+
+//----------------------------------------------------------------------------------------------------------------------
+
+extern HRESULT CompileShader(const std::wstring& file_name, const D3D_SHADER_MACRO* defines,
+    const std::string& entrypoint, const std::string& target, ID3DBlob** code);
 
 //----------------------------------------------------------------------------------------------------------------------
 
