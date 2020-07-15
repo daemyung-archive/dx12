@@ -24,6 +24,7 @@ vcpkg install fmt
 vcpkg install glslang
 vcpkg install spirv-tools
 vcpkg install spirv-cross
+vcpkg install rapidjson
 vcpkg install glfw3
 vcpkg install spdlog
 ```
