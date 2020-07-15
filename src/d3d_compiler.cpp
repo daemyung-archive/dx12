@@ -11,7 +11,6 @@
 #include <fmt/core.h>
 #include <glslang/Include/ResourceLimits.h>
 #include <SPIRV/GlslangToSpv.h>
-#include <spirv_cross/spirv_msl.hpp>
 
 #include "d3dcompiler.h"
 #include "d3d_blob.h"
@@ -21,7 +20,6 @@
 using namespace std;
 using namespace fmt;
 using namespace glslang;
-using namespace spirv_cross;
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -216,10 +214,7 @@ ID3DBlob* D3DCompiler::Compile(const std::string& hlsl, ID3DBlob** error) {
     vector<uint32_t> spirv;
     GlslangToSpv(*program.getIntermediate(language_), spirv, nullptr, &options);
 
-    CompilerMSL compiler(spirv);
-    auto msl = compiler.compile();
-
-    return new D3DBlob(msl.c_str(), msl.size());
+    return new D3DBlob(spirv.data(), spirv.size() * sizeof(uint32_t));
 }
 
 //----------------------------------------------------------------------------------------------------------------------

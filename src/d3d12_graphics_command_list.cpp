@@ -10,6 +10,7 @@
 #include "dxgi_swap_chain.h"
 #include "d3d12_helper.h"
 #include "d3d12_command_allocator.h"
+#include "d3d12_pipeline_state.h"
 #include "d3d12_resource.h"
 #include "metal_helper.h"
 
@@ -110,6 +111,11 @@ HRESULT STDMETHODCALLTYPE D3D12GraphicsCommandList::Reset(
     _In_opt_  ID3D12PipelineState *pInitialState) {
     SetCommandAllocator(dynamic_cast<D3D12CommandAllocator*>(pAllocator));
 
+    if (pInitialState) {
+        pipeline_state_ = dynamic_cast<D3D12PipelineState*>(pInitialState);
+        assert(pipeline_state_);
+    }
+
     return S_OK;
 }
 
@@ -127,7 +133,11 @@ void STDMETHODCALLTYPE D3D12GraphicsCommandList::DrawInstanced(
     _In_  UINT InstanceCount,
     _In_  UINT StartVertexLocation,
     _In_  UINT StartInstanceLocation) {
-    assert(false && "Not implement!!!");
+    [render_command_encoder_ drawPrimitives:primitive_type
+                                vertexStart:StartVertexLocation
+                                vertexCount:VertexCountPerInstance
+                              instanceCount:InstanceCount
+                               baseInstance:StartInstanceLocation];
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -208,7 +218,7 @@ void STDMETHODCALLTYPE D3D12GraphicsCommandList::ResolveSubresource(
 
 void STDMETHODCALLTYPE D3D12GraphicsCommandList::IASetPrimitiveTopology(
     _In_  D3D12_PRIMITIVE_TOPOLOGY PrimitiveTopology) {
-    assert(false && "Not implement!!!");
+    primitive_type = ToPrimitiveType(PrimitiveTopology);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -261,7 +271,22 @@ void STDMETHODCALLTYPE D3D12GraphicsCommandList::OMSetStencilRef(
 
 void STDMETHODCALLTYPE D3D12GraphicsCommandList::SetPipelineState(
     _In_  ID3D12PipelineState *pPipelineState) {
-    assert(false && "Not implement!!!");
+    if (!pPipelineState) {
+        return;
+    }
+
+    pipeline_state_ = dynamic_cast<D3D12PipelineState*>(pPipelineState);
+    assert(pipeline_state_);
+
+    if (render_command_encoder_) {
+        if (pipeline_state_->isGraphics()) {
+            [render_command_encoder_ setRenderPipelineState:pipeline_state_->GetRenderPipelineState()];
+            [render_command_encoder_ setCullMode:pipeline_state_->GetCullMode()];
+        } else {
+            assert(false && "Not implement!!!");
+        }
+        pipeline_state_= nullptr;
+    }
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -502,6 +527,16 @@ void STDMETHODCALLTYPE D3D12GraphicsCommandList::OMSetRenderTargets(
         [render_command_encoder_ setScissorRects:scissor_rects_.data()
                                            count:scissor_rects_.size()];
         scissor_rects_.clear();
+    }
+
+    if (pipeline_state_) {
+        if (pipeline_state_->isGraphics()) {
+            [render_command_encoder_ setRenderPipelineState:pipeline_state_->GetRenderPipelineState()];
+            [render_command_encoder_ setCullMode:pipeline_state_->GetCullMode()];
+        } else {
+            assert(false && "Not implement!!!");
+        }
+        pipeline_state_= nullptr;
     }
 }
 

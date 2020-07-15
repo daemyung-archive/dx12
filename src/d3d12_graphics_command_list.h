@@ -15,6 +15,7 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
+class D3D12PipelineState;
 class D3D12Resource;
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -309,6 +310,8 @@ private:
     std::unordered_map<D3D12Resource*, uint8_t> clear_stencils_;
     std::vector<MTLViewport> viewports_;
     std::vector<MTLScissorRect> scissor_rects_;
+    D3D12PipelineState* pipeline_state_ = { nullptr };
+    MTLPrimitiveType primitive_type;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

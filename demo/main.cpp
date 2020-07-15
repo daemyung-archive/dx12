@@ -9,6 +9,7 @@
 #include <dxgi.h>
 #include <d3d12.h>
 #include "clear_rtv_app.h"
+#include "triangle_app.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -38,7 +39,8 @@ int main(int argc, char* argv[])
 
     std::unique_ptr<App> app;
 
-    app = std::make_unique<ClearRTVApp>(window);
+    // app = std::make_unique<ClearRTVApp>(window);
+    app = std::make_unique<TriangleApp>(window);
 
     auto prev_time_stamp = glfwGetTime();
     while (!glfwWindowShouldClose(window)) {

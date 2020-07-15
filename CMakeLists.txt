@@ -15,6 +15,8 @@ find_package(SPIRV-Tools CONFIG REQUIRED)
 find_package(spirv_cross_core CONFIG REQUIRED)
 find_package(spirv_cross_glsl CONFIG REQUIRED)
 find_package(spirv_cross_msl CONFIG REQUIRED)
+find_package(spirv_cross_reflect CONFIG REQUIRED)
+find_package(RapidJSON CONFIG REQUIRED)
 
 add_library(dx12
 STATIC
@@ -53,6 +55,8 @@ STATIC
     src/d3d12_command_queue.cpp
     src/d3d12_command_allocator.h
     src/d3d12_command_allocator.cpp
+    src/d3d12_pipeline_state.h
+    src/d3d12_pipeline_state.cpp
     src/d3d12_command_list.h
     src/d3d12_command_list.cpp
     src/d3d12_graphics_command_list.h
@@ -70,6 +74,8 @@ STATIC
 target_include_directories(dx12
 PUBLIC
     include
+PRIVATE
+    ${RAPIDJSON_INCLUDE_DIRS}
 )
 
 target_compile_options(dx12
@@ -90,6 +96,7 @@ PUBLIC
     spirv-cross-core
     spirv-cross-glsl
     spirv-cross-msl
+    spirv-cross-reflect
 )
 
 set_target_properties(dx12
@@ -109,6 +116,8 @@ add_executable(dx12_demo
     demo/app.cpp
     demo/clear_rtv_app.h
     demo/clear_rtv_app.cpp
+    demo/triangle_app.h
+    demo/triangle_app.cpp
     demo/main.cpp
 )
 

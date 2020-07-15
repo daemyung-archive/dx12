@@ -9,6 +9,7 @@
 
 #include "d3d12_command_queue.h"
 #include "d3d12_command_allocator.h"
+#include "d3d12_pipeline_state.h"
 #include "d3d12_graphics_command_list.h"
 #include "d3d12_descriptor_heap.h"
 #include "d3d12_resource.h"
@@ -120,7 +121,7 @@ HRESULT STDMETHODCALLTYPE D3D12Device::CreateGraphicsPipelineState(
     _In_  const D3D12_GRAPHICS_PIPELINE_STATE_DESC *pDesc,
     REFIID riid,
     _COM_Outptr_  void **ppPipelineState) {
-    assert(false && "Not implement!!!");
+    *ppPipelineState = new D3D12PipelineState(this, pDesc);
     return S_OK;
 }
 
