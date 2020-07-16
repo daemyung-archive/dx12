@@ -6,6 +6,7 @@
 #include "d3d12_pipeline_state.h"
 
 #include <cassert>
+#include <algorithm>
 #include <spirv_cross/spirv_reflect.hpp>
 #include <spirv_cross/spirv_msl.hpp>
 #include <rapidjson/document.h>
@@ -29,11 +30,13 @@ D3D12PipelineState::D3D12PipelineState(D3D12Device* device, const D3D12_GRAPHICS
     descriptor.fragmentFunction = CreateFunction(desc->PS);
 
     for (auto i = 0; i != desc->InputLayout.NumElements; ++i) {
-        descriptor.vertexDescriptor.layouts[i + 16].stride +=
+        const auto input_slot = desc->InputLayout.pInputElementDescs[i].InputSlot + 16;
+
+        descriptor.vertexDescriptor.layouts[input_slot].stride +=
             GetSize(desc->InputLayout.pInputElementDescs[i].Format);
-        descriptor.vertexDescriptor.layouts[i + 16].stepRate =
-            desc->InputLayout.pInputElementDescs[i].InstanceDataStepRate;
-        descriptor.vertexDescriptor.layouts[i + 16].stepFunction =
+        descriptor.vertexDescriptor.layouts[input_slot].stepRate =
+            std::max(1u, desc->InputLayout.pInputElementDescs[i].InstanceDataStepRate);
+        descriptor.vertexDescriptor.layouts[input_slot].stepFunction =
             ToVertexStepFunction(desc->InputLayout.pInputElementDescs[i].InputSlotClass);
     }
 

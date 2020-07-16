@@ -130,6 +130,8 @@ inline auto GetSize(DXGI_FORMAT format) {
         case DXGI_FORMAT_B8G8R8A8_UNORM:
         case DXGI_FORMAT_D24_UNORM_S8_UINT:
             return 4;
+        case DXGI_FORMAT_R32G32_FLOAT:
+            return 8;
         case DXGI_FORMAT_R32G32B32_FLOAT:
             return 12;
         case DXGI_FORMAT_R32G32B32A32_FLOAT:

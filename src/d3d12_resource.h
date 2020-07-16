@@ -83,12 +83,15 @@ public:
         _Out_opt_  D3D12_HEAP_PROPERTIES *pHeapProperties,
         _Out_opt_  D3D12_HEAP_FLAGS *pHeapFlags) override;
 
+    id<MTLBuffer> GetBuffer() const;
+
     id<MTLTexture> GetTexture() const;
 
 private:
     D3D12_HEAP_PROPERTIES heap_properties_;
     D3D12_HEAP_FLAGS heap_flags_;
     D3D12_RESOURCE_DESC desc_;
+    id<MTLBuffer> buffer_ = { nil };
     id<MTLTexture> texture_ = { nil };
     DXGISwapChain* swap_chain_ptr_ = { nil };
 };

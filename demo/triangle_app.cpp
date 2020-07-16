@@ -9,45 +9,85 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
+struct Vertex {
+    float position[2];
+    float color[3];
+};
+
+//----------------------------------------------------------------------------------------------------------------------
+
 TriangleApp::TriangleApp(GLFWwindow* window)
 : App(window) {
     HRESULT result;
 
-    ComPtr<ID3DBlob> vertex_code;
-    result = CompileShader(L"/Users/djang/repos/dx12/demo/triangle.hlsl", nullptr, "VS", "vs_5_0", &vertex_code);
-    assert(SUCCEEDED(result));
+    {
+        Vertex vertices[] = {
+            { { -0.7, -0.7 }, { 1.0, 0.0, 0.0 } },
+            { {  0.0,  0.7 }, { 0.0, 1.0, 0.0 } },
+            { {  0.7, -0.7 }, { 0.0, 0.0, 1.0 } },
+        };
 
-    ComPtr<ID3DBlob> pixel_code;
-    result = CompileShader(L"/Users/djang/repos/dx12/demo/triangle.hlsl", nullptr, "PS", "ps_5_0", &pixel_code);
-    assert(SUCCEEDED(result));
+        auto properties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+        auto desc = CD3DX12_RESOURCE_DESC::Buffer(sizeof(vertices));
+        result = device_->CreateCommittedResource(&properties, D3D12_HEAP_FLAG_NONE, &desc,
+            D3D12_RESOURCE_STATE_COMMON, nullptr, IID_PPV_ARGS(&vertex_buffer_));
+        assert(SUCCEEDED(result));
 
-    D3D12_GRAPHICS_PIPELINE_STATE_DESC desc = {
-        .VS = {
-            .pShaderBytecode = vertex_code->GetBufferPointer(),
-            .BytecodeLength = vertex_code->GetBufferSize()
-        },
-        .PS = {
-            .pShaderBytecode = pixel_code->GetBufferPointer(),
-            .BytecodeLength = pixel_code->GetBufferSize()
-        },
-        .BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT),
-        .SampleMask = UINT_MAX,
-        .RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT),
-        .DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT),
-        .PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE,
-        .NumRenderTargets = 1,
-        .RTVFormats = {
-            kBackBufferFormat
-        },
-        // .DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT,
-        .SampleDesc = {
-            .Count = 1,
-            .Quality = 0
-        }
-    };
+        void* data;
+        vertex_buffer_->Map(0, nullptr, &data);
+        memcpy(data, vertices, sizeof(vertices));
 
-    result = device_->CreateGraphicsPipelineState(&desc, IID_PPV_ARGS(&pipeline_state_));
-    assert(SUCCEEDED(result));
+        vertex_buffer_view_.BufferLocation = vertex_buffer_->GetGPUVirtualAddress();
+        vertex_buffer_view_.StrideInBytes = sizeof(Vertex);
+        vertex_buffer_view_.SizeInBytes = sizeof(vertices);
+    }
+
+    {
+        ComPtr<ID3DBlob> vertex_code;
+        result = CompileShader(L"../../demo/triangle.hlsl", nullptr, "VS", "vs_5_0", &vertex_code);
+        assert(SUCCEEDED(result));
+
+        ComPtr<ID3DBlob> pixel_code;
+        result = CompileShader(L"../../demo/triangle.hlsl", nullptr, "PS", "ps_5_0", &pixel_code);
+        assert(SUCCEEDED(result));
+
+        D3D12_INPUT_ELEMENT_DESC input_element_descs[2] = {
+            { "POSITION", 0, DXGI_FORMAT_R32G32_FLOAT,    0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
+            { "COLOR",    0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 8, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0}
+        };
+
+        D3D12_GRAPHICS_PIPELINE_STATE_DESC desc = {
+            .VS = {
+                .pShaderBytecode = vertex_code->GetBufferPointer(),
+                .BytecodeLength = vertex_code->GetBufferSize()
+            },
+            .PS = {
+                .pShaderBytecode = pixel_code->GetBufferPointer(),
+                .BytecodeLength = pixel_code->GetBufferSize()
+            },
+            .BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT),
+            .SampleMask = UINT_MAX,
+            .RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT),
+            .DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT),
+            .InputLayout = {
+                .pInputElementDescs = input_element_descs,
+                .NumElements = 2
+            },
+            .PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE,
+            .NumRenderTargets = 1,
+            .RTVFormats = {
+                kBackBufferFormat
+            },
+            .DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT,
+            .SampleDesc = {
+                .Count = 1,
+                .Quality = 0
+            }
+        };
+
+        result = device_->CreateGraphicsPipelineState(&desc, IID_PPV_ARGS(&pipeline_state_));
+        assert(SUCCEEDED(result));
+    }
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -77,11 +117,11 @@ void TriangleApp::OnRender(double delta_time) {
 
     FLOAT clear_color[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
     command_list_->ClearRenderTargetView(back_buffer_view, clear_color, 0, nullptr);
-//    command_list_->ClearDepthStencilView(depth_stencil_view,
-//        D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
-//    command_list_->OMSetRenderTargets(1, &back_buffer_view, true, &depth_stencil_view);
-    command_list_->OMSetRenderTargets(1, &back_buffer_view, true, nullptr);
+    command_list_->ClearDepthStencilView(depth_stencil_view,
+        D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
+    command_list_->OMSetRenderTargets(1, &back_buffer_view, true, &depth_stencil_view);
     command_list_->SetPipelineState(pipeline_state_.Get());
+    command_list_->IASetVertexBuffers(0, 1, &vertex_buffer_view_);
     command_list_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     command_list_->DrawInstanced(3, 1, 0, 0);
 

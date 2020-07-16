@@ -311,6 +311,7 @@ private:
     std::vector<MTLViewport> viewports_;
     std::vector<MTLScissorRect> scissor_rects_;
     D3D12PipelineState* pipeline_state_ = { nullptr };
+    std::vector<D3D12Resource*> vertex_buffers_;
     MTLPrimitiveType primitive_type;
 };
 

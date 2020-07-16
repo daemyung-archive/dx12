@@ -1,3 +1,9 @@
+struct IA2VS
+{
+    float2 position : POSITION;
+    float3 color : COLOR;
+};
+
 struct VS2RS
 {
     float4 position : SV_POSITION;
@@ -10,21 +16,11 @@ struct RS2PS
     float3 color : COLOR;
 };
 
-struct Vertex {
-    float2 position;
-    float3 color;  
-};
-
-VS2RS VS(uint vertex_id: SV_VertexID)
+VS2RS VS(IA2VS input)
 {
-    Vertex vertices[3];
-    vertices[0] = Vertex(float2(-0.7, -0.7), float3(1.0, 0.0, 0.0));
-    vertices[1] = Vertex(float2(0.0, 0.7), float3(0.0, 1.0, 0.0));
-    vertices[2] = Vertex(float2(0.7, -0.7), float3(0.0, 0.0, 1.0));
-
     VS2RS output;
-    output.position = float4(vertices[vertex_id].position, 0.0, 1.0);
-    output.color = vertices[vertex_id].color;
+    output.position = float4(input.position, 0.0, 1.0);
+    output.color = input.color;
 
     return output;
 }

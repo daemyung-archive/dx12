@@ -17,7 +17,9 @@ D3D12Resource::D3D12Resource(D3D12Device* device, const D3D12_HEAP_PROPERTIES* h
     D3D12_HEAP_FLAGS heap_flags, const D3D12_RESOURCE_DESC* desc, const D3D12_CLEAR_VALUE *clear_value)
 : D3D12Pageable(device), heap_properties_(*heap_properties), heap_flags_(heap_flags), desc_(*desc) {
     if (desc_.Dimension == D3D12_RESOURCE_DIMENSION_BUFFER) {
-        assert(false && "Not implement!!!");
+        buffer_ = [device_->GetDevice() newBufferWithLength:desc_.Width
+                                                    options:ToResourceStorageMode(heap_properties_.Type)];
+        assert(buffer_);
     }
     else {
         auto descriptor = [MTLTextureDescriptor new];
@@ -119,7 +121,8 @@ HRESULT STDMETHODCALLTYPE D3D12Resource::Map(
     UINT Subresource,
     _In_opt_  const D3D12_RANGE *pReadRange,
     _Outptr_opt_result_bytebuffer_(_Inexpressible_("Dependent on resource"))  void **ppData) {
-    assert(false && "Not implement!!!");
+    *ppData = [buffer_ contents];
+
     return S_OK;
 }
 
@@ -141,8 +144,7 @@ D3D12_RESOURCE_DESC STDMETHODCALLTYPE D3D12Resource::GetDesc( void) {
 //----------------------------------------------------------------------------------------------------------------------
 
 D3D12_GPU_VIRTUAL_ADDRESS STDMETHODCALLTYPE D3D12Resource::GetGPUVirtualAddress( void) {
-    assert(false && "Not implement!!!");
-    return D3D12_GPU_VIRTUAL_ADDRESS();
+    return reinterpret_cast<D3D12_GPU_VIRTUAL_ADDRESS>(this);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -176,6 +178,12 @@ HRESULT STDMETHODCALLTYPE D3D12Resource::GetHeapProperties(
     _Out_opt_  D3D12_HEAP_FLAGS *pHeapFlags) {
     assert(false && "Not implement!!!");
     return S_OK;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+id<MTLBuffer> D3D12Resource::GetBuffer() const {
+    return buffer_;
 }
 
 //----------------------------------------------------------------------------------------------------------------------

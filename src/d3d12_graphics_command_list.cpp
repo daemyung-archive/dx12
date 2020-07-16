@@ -440,7 +440,25 @@ void STDMETHODCALLTYPE D3D12GraphicsCommandList::IASetVertexBuffers(
     _In_  UINT StartSlot,
     _In_  UINT NumViews,
     _In_reads_opt_(NumViews)  const D3D12_VERTEX_BUFFER_VIEW *pViews) {
-    assert(false && "Not implement!!!");
+    vertex_buffers_.resize(16);
+    for (auto i = 0; i != NumViews; ++i) {
+        vertex_buffers_[i + StartSlot] =
+            reinterpret_cast<D3D12Resource*>(pViews[i].BufferLocation);
+    }
+
+    if (render_command_encoder_) {
+        for (auto i = 0; i != 16; ++i) {
+            if (!vertex_buffers_[i]) {
+                continue;
+            }
+
+            [render_command_encoder_ setVertexBuffer:vertex_buffers_[i]->GetBuffer()
+                                              offset:0
+                                             atIndex:i + 16];
+        }
+
+        vertex_buffers_.clear();
+    }
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -537,6 +555,20 @@ void STDMETHODCALLTYPE D3D12GraphicsCommandList::OMSetRenderTargets(
             assert(false && "Not implement!!!");
         }
         pipeline_state_= nullptr;
+    }
+
+    if (!vertex_buffers_.empty()) {
+        for (auto i = 0; i != 16; ++i) {
+            if (!vertex_buffers_[i]) {
+                continue;
+            }
+
+            [render_command_encoder_ setVertexBuffer:vertex_buffers_[i]->GetBuffer()
+                                              offset:0
+                                             atIndex:i + 16];
+        }
+
+        vertex_buffers_.clear();
     }
 }
 

@@ -17,6 +17,8 @@ public:
     void OnRender(double delta_time) override;
 
 private:
+    ComPtr<ID3D12Resource> vertex_buffer_;
+    D3D12_VERTEX_BUFFER_VIEW vertex_buffer_view_;
     ComPtr<ID3D12PipelineState> pipeline_state_;
 };
 
