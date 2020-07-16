@@ -94,7 +94,6 @@ void STDMETHODCALLTYPE D3D12CommandQueue::UpdateTileMappings(
     _In_reads_opt_(NumRanges)  const UINT *pRangeTileCounts,
     D3D12_TILE_MAPPING_FLAGS Flags) {
     assert(false && "Not implement!!!");
-    return S_OK;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -107,7 +106,6 @@ void STDMETHODCALLTYPE D3D12CommandQueue::CopyTileMappings(
     _In_  const D3D12_TILE_REGION_SIZE *pRegionSize,
     D3D12_TILE_MAPPING_FLAGS Flags) {
     assert(false && "Not implement!!!");
-    return S_OK;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -136,7 +134,6 @@ void STDMETHODCALLTYPE D3D12CommandQueue::SetMarker(
     _In_reads_bytes_opt_(Size)  const void *pData,
     UINT Size) {
     assert(false && "Not implement!!!");
-    return S_OK;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -146,14 +143,12 @@ void STDMETHODCALLTYPE D3D12CommandQueue::BeginEvent(
     _In_reads_bytes_opt_(Size)  const void *pData,
     UINT Size) {
     assert(false && "Not implement!!!");
-    return S_OK;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
 void STDMETHODCALLTYPE D3D12CommandQueue::EndEvent( void) {
     assert(false && "Not implement!!!");
-    return S_OK;
 }
 
 //----------------------------------------------------------------------------------------------------------------------

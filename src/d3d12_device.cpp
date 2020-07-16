@@ -195,7 +195,6 @@ void STDMETHODCALLTYPE D3D12Device::CreateConstantBufferView(
     _In_opt_  const D3D12_CONSTANT_BUFFER_VIEW_DESC *pDesc,
     _In_  D3D12_CPU_DESCRIPTOR_HANDLE DestDescriptor) {
     assert(false && "Not implement!!!");
-    return S_OK;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -205,7 +204,6 @@ void STDMETHODCALLTYPE D3D12Device::CreateShaderResourceView(
     _In_opt_  const D3D12_SHADER_RESOURCE_VIEW_DESC *pDesc,
     _In_  D3D12_CPU_DESCRIPTOR_HANDLE DestDescriptor) {
     assert(false && "Not implement!!!");
-    return S_OK;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -216,7 +214,6 @@ void STDMETHODCALLTYPE D3D12Device::CreateUnorderedAccessView(
     _In_opt_  const D3D12_UNORDERED_ACCESS_VIEW_DESC *pDesc,
     _In_  D3D12_CPU_DESCRIPTOR_HANDLE DestDescriptor) {
     assert(false && "Not implement!!!");
-    return S_OK;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -226,8 +223,6 @@ void STDMETHODCALLTYPE D3D12Device::CreateRenderTargetView(
     _In_opt_  const D3D12_RENDER_TARGET_VIEW_DESC *pDesc,
     _In_  D3D12_CPU_DESCRIPTOR_HANDLE DestDescriptor) {
     memcpy(reinterpret_cast<void**>(DestDescriptor.ptr), &pResource, sizeof(D3D12Resource*));
-    
-    return S_OK;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -237,8 +232,6 @@ void STDMETHODCALLTYPE D3D12Device::CreateDepthStencilView(
     _In_opt_  const D3D12_DEPTH_STENCIL_VIEW_DESC *pDesc,
     _In_  D3D12_CPU_DESCRIPTOR_HANDLE DestDescriptor) {
     memcpy(reinterpret_cast<void**>(DestDescriptor.ptr), &pResource, sizeof(D3D12Resource*));
-    
-    return S_OK;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -247,7 +240,6 @@ void STDMETHODCALLTYPE D3D12Device::CreateSampler(
     _In_  const D3D12_SAMPLER_DESC *pDesc,
     _In_  D3D12_CPU_DESCRIPTOR_HANDLE DestDescriptor) {
     assert(false && "Not implement!!!");
-    return S_OK;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -261,7 +253,6 @@ void STDMETHODCALLTYPE D3D12Device::CopyDescriptors(
     _In_reads_opt_(NumSrcDescriptorRanges)  const UINT *pSrcDescriptorRangeSizes,
     _In_  D3D12_DESCRIPTOR_HEAP_TYPE DescriptorHeapsType) {
     assert(false && "Not implement!!!");
-    return S_OK;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -272,7 +263,6 @@ void STDMETHODCALLTYPE D3D12Device::CopyDescriptorsSimple(
     _In_  D3D12_CPU_DESCRIPTOR_HANDLE SrcDescriptorRangeStart,
     _In_  D3D12_DESCRIPTOR_HEAP_TYPE DescriptorHeapsType) {
     assert(false && "Not implement!!!");
-    return S_OK;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -427,7 +417,6 @@ void STDMETHODCALLTYPE D3D12Device::GetCopyableFootprints(
     _Out_writes_opt_(NumSubresources)  UINT64 *pRowSizeInBytes,
     _Out_opt_  UINT64 *pTotalBytes) {
     assert(false && "Not implement!!!");
-    return S_OK;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -470,7 +459,6 @@ void STDMETHODCALLTYPE D3D12Device::GetResourceTiling(
     _In_  UINT FirstSubresourceTilingToGet,
     _Out_writes_(*pNumSubresourceTilings)  D3D12_SUBRESOURCE_TILING *pSubresourceTilingsForNonPackedMips) {
     assert(false && "Not implement!!!");
-    return S_OK;
 }
 
 //----------------------------------------------------------------------------------------------------------------------

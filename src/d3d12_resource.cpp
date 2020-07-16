@@ -132,7 +132,6 @@ void STDMETHODCALLTYPE D3D12Resource::Unmap(
     UINT Subresource,
     _In_opt_  const D3D12_RANGE *pWrittenRange) {
     assert(false && "Not implement!!!");
-    return S_OK;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
