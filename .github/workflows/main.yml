@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install requirements
+      run: |
+        git clone https://github.com/Microsoft/vcpkg.git
+        vcpkg/bootstrap-vcpkg.sh
+
+    - name: Install dependencies
+      run: |
+        vcpkg/vcpkg install fmt
+        vcpkg/vcpkg install glslang
+        vcpkg/vcpkg install spirv-tools
+        vcpkg/vcpkg install spirv-cross
+        vcpkg/vcpkg install rapidjson
+        vcpkg/vcpkg install glfw3
+        vcpkg/vcpkg install spdlog
+
+    - name: Build
+      run: |
+        mkdir build
+        cmake . -B build -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake
+        cmake --build build
