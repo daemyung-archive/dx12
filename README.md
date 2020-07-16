@@ -17,6 +17,10 @@
 
 ## Build
 
+### Status
+
+![CI](https://github.com/daemyung/dx12/workflows/CI/badge.svg)
+
 ### Install dependencies
 
 ```
