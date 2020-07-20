@@ -10,18 +10,21 @@
 
 #include "dxgi.h"
 #include "dxgi_device_sub_object.h"
-#include "d3d12_resource.h"
 #include "metal_library.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 
 class D3D12CommandQueue;
+class D3D12Texture;
 
 //----------------------------------------------------------------------------------------------------------------------
 
 class DXGISwapChain : public IDXGISwapChain, public DXGIDeviceSubObject {
 public:
-    DXGISwapChain(DXGIFactory* factory, D3D12Device* device, D3D12CommandQueue* command_queue,
+    DXGISwapChain(
+        DXGIFactory* factory,
+        D3D12Device* device,
+        D3D12CommandQueue* command_queue,
         const DXGI_SWAP_CHAIN_DESC* desc);
 
     HRESULT STDMETHODCALLTYPE QueryInterface(
@@ -121,7 +124,7 @@ private:
     DXGI_SWAP_CHAIN_DESC desc_;
     CAMetalLayer* layer_ = { nil };
     mutable id<CAMetalDrawable> drawable_ = { nil };
-    std::unique_ptr<D3D12Resource> buffer_;
+    std::unique_ptr<D3D12Texture> texture_;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

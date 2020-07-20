@@ -65,6 +65,10 @@ STATIC
     src/d3d12_descriptor_heap.cpp
     src/d3d12_resource.h
     src/d3d12_resource.cpp
+    src/d3d12_buffer.h
+    src/d3d12_buffer.cpp
+    src/d3d12_texture.h
+    src/d3d12_texture.cpp
     src/d3d_blob.h
     src/d3d_blob.cpp
     src/d3d_compiler.h
@@ -88,6 +92,7 @@ PUBLIC
     "-framework QuartzCore"
     "-framework Metal"
     fmt::fmt
+    spdlog::spdlog
     glslang::HLSL
     glslang::SPIRV
     glslang::glslang
@@ -124,7 +129,6 @@ add_executable(dx12_demo
 target_link_libraries(dx12_demo
 PRIVATE
     dx12
-    spdlog::spdlog
     glfw
 )
 

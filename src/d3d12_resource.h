@@ -8,20 +8,16 @@
 
 #include "d3d12.h"
 #include "d3d12_pageable.h"
-#include "metal_library.h"
-
-//----------------------------------------------------------------------------------------------------------------------
-
-class DXGISwapChain;
 
 //----------------------------------------------------------------------------------------------------------------------
 
 class D3D12Resource : public ID3D12Resource, public D3D12Pageable {
 public:
-    D3D12Resource(D3D12Device* device, const D3D12_HEAP_PROPERTIES* heap_properties,
-        D3D12_HEAP_FLAGS heap_flags, const D3D12_RESOURCE_DESC* desc, const D3D12_CLEAR_VALUE *clear_value);
-
-    D3D12Resource(D3D12Device* device, DXGISwapChain* swap_chain);
+    D3D12Resource(
+        D3D12Device* device,
+        const D3D12_HEAP_PROPERTIES* heap_properties,
+        D3D12_HEAP_FLAGS heap_flags,
+        const D3D12_RESOURCE_DESC* resource_desc);
 
     HRESULT STDMETHODCALLTYPE QueryInterface(
         REFIID riid,
@@ -52,15 +48,6 @@ public:
         REFIID riid,
         _COM_Outptr_opt_  void **ppvDevice) override;
 
-    HRESULT STDMETHODCALLTYPE Map(
-        UINT Subresource,
-        _In_opt_  const D3D12_RANGE *pReadRange,
-        _Outptr_opt_result_bytebuffer_(_Inexpressible_("Dependent on resource"))  void **ppData) override;
-
-    void STDMETHODCALLTYPE Unmap(
-        UINT Subresource,
-        _In_opt_  const D3D12_RANGE *pWrittenRange) override;
-
     D3D12_RESOURCE_DESC STDMETHODCALLTYPE GetDesc( void) override;
 
     D3D12_GPU_VIRTUAL_ADDRESS STDMETHODCALLTYPE GetGPUVirtualAddress( void) override;
@@ -83,17 +70,10 @@ public:
         _Out_opt_  D3D12_HEAP_PROPERTIES *pHeapProperties,
         _Out_opt_  D3D12_HEAP_FLAGS *pHeapFlags) override;
 
-    id<MTLBuffer> GetBuffer() const;
-
-    id<MTLTexture> GetTexture() const;
-
-private:
+protected:
     D3D12_HEAP_PROPERTIES heap_properties_;
     D3D12_HEAP_FLAGS heap_flags_;
-    D3D12_RESOURCE_DESC desc_;
-    id<MTLBuffer> buffer_ = { nil };
-    id<MTLTexture> texture_ = { nil };
-    DXGISwapChain* swap_chain_ptr_ = { nil };
+    D3D12_RESOURCE_DESC resource_desc_;
 };
 
 //----------------------------------------------------------------------------------------------------------------------

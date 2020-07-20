@@ -11,13 +11,15 @@
 #include "d3d12_helper.h"
 #include "d3d12_command_allocator.h"
 #include "d3d12_pipeline_state.h"
-#include "d3d12_resource.h"
+#include "d3d12_buffer.h"
+#include "d3d12_texture.h"
 #include "metal_helper.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 
 D3D12GraphicsCommandList::D3D12GraphicsCommandList(D3D12Device* device_ptr)
 : D3D12CommandList(device_ptr) {
+    vertex_buffers_.fill(nullptr);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -440,24 +442,15 @@ void STDMETHODCALLTYPE D3D12GraphicsCommandList::IASetVertexBuffers(
     _In_  UINT StartSlot,
     _In_  UINT NumViews,
     _In_reads_opt_(NumViews)  const D3D12_VERTEX_BUFFER_VIEW *pViews) {
-    vertex_buffers_.resize(16);
     for (auto i = 0; i != NumViews; ++i) {
-        vertex_buffers_[i + StartSlot] =
-            reinterpret_cast<D3D12Resource*>(pViews[i].BufferLocation);
-    }
+        auto buffer = reinterpret_cast<D3D12Buffer*>(pViews[i].BufferLocation);
+        assert(buffer);
 
-    if (render_command_encoder_) {
-        for (auto i = 0; i != 16; ++i) {
-            if (!vertex_buffers_[i]) {
-                continue;
-            }
-
-            [render_command_encoder_ setVertexBuffer:vertex_buffers_[i]->GetBuffer()
-                                              offset:0
-                                             atIndex:i + 16];
+        if (render_command_encoder_) {
+            buffer->BindAsVertexBuffer(render_command_encoder_, 0, StartSlot + i);
+        } else {
+            vertex_buffers_[StartSlot + i] = buffer;
         }
-
-        vertex_buffers_.clear();
     }
 }
 
@@ -485,44 +478,44 @@ void STDMETHODCALLTYPE D3D12GraphicsCommandList::OMSetRenderTargets(
     auto descriptor = [MTLRenderPassDescriptor new];
 
     for (auto i = 0; i != NumRenderTargetDescriptors; ++i) {
-        auto resource = ToResource(pRenderTargetDescriptors[i]);
-        assert(resource);
+        auto texture = ToTexture(pRenderTargetDescriptors[i]);
+        assert(texture);
 
-        descriptor.colorAttachments[i].texture = resource->GetTexture();
+        descriptor.colorAttachments[i].texture = texture->GetTexture();
         descriptor.colorAttachments[i].storeAction = MTLStoreActionStore;
 
-        if (clear_colors_.find(resource) != std::end(clear_colors_)) {
+        if (clear_colors_.find(texture) != std::end(clear_colors_)) {
             descriptor.colorAttachments[i].loadAction = MTLLoadActionClear;
-            descriptor.colorAttachments[i].clearColor = clear_colors_[resource];
-            clear_colors_.erase(resource);
+            descriptor.colorAttachments[i].clearColor = clear_colors_[texture];
+            clear_colors_.erase(texture);
         } else {
             descriptor.colorAttachments[i].loadAction = MTLLoadActionLoad;
         }
     }
 
     if (pDepthStencilDescriptor) {
-        auto resource = ToResource(*pDepthStencilDescriptor);
-        assert(resource);
+        auto texture = ToTexture(*pDepthStencilDescriptor);
+        assert(texture);
 
-        descriptor.depthAttachment.texture = resource->GetTexture();
+        descriptor.depthAttachment.texture = texture->GetTexture();
         descriptor.depthAttachment.storeAction = MTLStoreActionStore;
 
-        if (clear_depths_.find(resource) != std::end(clear_depths_)) {
+        if (clear_depths_.find(texture) != std::end(clear_depths_)) {
             descriptor.depthAttachment.loadAction = MTLLoadActionClear;
-            descriptor.depthAttachment.clearDepth = clear_depths_[resource];
-            clear_depths_.erase(resource);
+            descriptor.depthAttachment.clearDepth = clear_depths_[texture];
+            clear_depths_.erase(texture);
 
         } else {
             descriptor.depthAttachment.loadAction = MTLLoadActionLoad;
         }
 
-        descriptor.stencilAttachment.texture = resource->GetTexture();
+        descriptor.stencilAttachment.texture = texture->GetTexture();
         descriptor.stencilAttachment.storeAction = MTLStoreActionStore;
 
-        if (clear_stencils_.find(resource) != std::end(clear_stencils_)) {
+        if (clear_stencils_.find(texture) != std::end(clear_stencils_)) {
             descriptor.stencilAttachment.loadAction = MTLLoadActionClear;
-            descriptor.stencilAttachment.clearStencil = clear_stencils_[resource];
-            clear_stencils_.erase(resource);
+            descriptor.stencilAttachment.clearStencil = clear_stencils_[texture];
+            clear_stencils_.erase(texture);
 
         } else {
             descriptor.stencilAttachment.loadAction = MTLLoadActionLoad;
@@ -557,18 +550,13 @@ void STDMETHODCALLTYPE D3D12GraphicsCommandList::OMSetRenderTargets(
         pipeline_state_= nullptr;
     }
 
-    if (!vertex_buffers_.empty()) {
-        for (auto i = 0; i != 16; ++i) {
-            if (!vertex_buffers_[i]) {
-                continue;
-            }
-
-            [render_command_encoder_ setVertexBuffer:vertex_buffers_[i]->GetBuffer()
-                                              offset:0
-                                             atIndex:i + 16];
+    for (auto i = 0; i != 16; ++i) {
+        if (!vertex_buffers_[i]) {
+            continue;
         }
 
-        vertex_buffers_.clear();
+        vertex_buffers_[i]->BindAsVertexBuffer(render_command_encoder_, 0, i);
+        vertex_buffers_[i] = nullptr;
     }
 }
 
@@ -581,7 +569,7 @@ void STDMETHODCALLTYPE D3D12GraphicsCommandList::ClearDepthStencilView(
     _In_  UINT8 Stencil,
     _In_  UINT NumRects,
     _In_reads_(NumRects)  const D3D12_RECT *pRects) {
-    auto resource = ToResource(DepthStencilView);
+    auto resource = ToTexture(DepthStencilView);
     assert(resource);
 
     if (ClearFlags & D3D12_CLEAR_FLAG_DEPTH) {
@@ -600,7 +588,7 @@ void STDMETHODCALLTYPE D3D12GraphicsCommandList::ClearRenderTargetView(
     _In_  const FLOAT ColorRGBA[ 4 ],
     _In_  UINT NumRects,
     _In_reads_(NumRects)  const D3D12_RECT *pRects) {
-    clear_colors_[ToResource(RenderTargetView)] = ToClearColor(ColorRGBA);
+    clear_colors_[ToTexture(RenderTargetView)] = ToClearColor(ColorRGBA);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

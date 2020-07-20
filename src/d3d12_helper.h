@@ -10,12 +10,12 @@
 
 //----------------------------------------------------------------------------------------------------------------------
 
-class D3D12Resource;
+class D3D12Texture;
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline auto ToResource(D3D12_CPU_DESCRIPTOR_HANDLE handle) {
-    return *reinterpret_cast<D3D12Resource**>(handle.ptr);
+inline auto ToTexture(D3D12_CPU_DESCRIPTOR_HANDLE handle) {
+    return *reinterpret_cast<D3D12Texture**>(handle.ptr);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

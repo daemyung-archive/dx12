@@ -8,6 +8,7 @@
 
 #include <vector>
 #include <unordered_map>
+#include <array>
 
 #include "d3d12.h"
 #include "d3d12_command_list.h"
@@ -17,6 +18,7 @@
 
 class D3D12PipelineState;
 class D3D12Resource;
+class D3D12Buffer;
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -311,7 +313,7 @@ private:
     std::vector<MTLViewport> viewports_;
     std::vector<MTLScissorRect> scissor_rects_;
     D3D12PipelineState* pipeline_state_ = { nullptr };
-    std::vector<D3D12Resource*> vertex_buffers_;
+    std::array<D3D12Buffer*, 16> vertex_buffers_;
     MTLPrimitiveType primitive_type;
 };
 

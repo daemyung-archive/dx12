@@ -12,7 +12,8 @@
 #include "d3d12_pipeline_state.h"
 #include "d3d12_graphics_command_list.h"
 #include "d3d12_descriptor_heap.h"
-#include "d3d12_resource.h"
+#include "d3d12_buffer.h"
+#include "d3d12_texture.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -294,7 +295,11 @@ HRESULT STDMETHODCALLTYPE D3D12Device::CreateCommittedResource(
     _In_opt_  const D3D12_CLEAR_VALUE *pOptimizedClearValue,
     REFIID riidResource,
     _COM_Outptr_opt_  void **ppvResource) {
-    *ppvResource = new D3D12Resource(this, pHeapProperties, HeapFlags, pDesc, pOptimizedClearValue);
+    if (pDesc->Dimension == D3D12_RESOURCE_DIMENSION_BUFFER) {
+        *ppvResource = new D3D12Buffer(this, pHeapProperties, HeapFlags, pDesc);
+    } else {
+        *ppvResource = new D3D12Texture(this, pHeapProperties, HeapFlags, pDesc, pOptimizedClearValue);
+    }
     assert(*ppvResource);
 
     return S_OK;
