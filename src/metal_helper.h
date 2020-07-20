@@ -89,7 +89,7 @@ inline auto ToTextureType(D3D12_RESOURCE_DIMENSION dimension, bool is_array, boo
 
 //----------------------------------------------------------------------------------------------------------------------
 
-inline auto ToResourceStorageMode(D3D12_HEAP_TYPE type) {
+inline auto ToResourceOptions(D3D12_HEAP_TYPE type) {
     switch (type) {
         case D3D12_HEAP_TYPE_DEFAULT:
             return MTLResourceStorageModePrivate;

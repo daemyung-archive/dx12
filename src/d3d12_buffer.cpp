@@ -31,7 +31,7 @@ D3D12Buffer::D3D12Buffer(
     assert(resource_desc_.Height == 1);
 
     buffer_ = [device_->GetDevice() newBufferWithLength:resource_desc_.Width
-                                                options:ToResourceStorageMode(heap_properties_.Type)];
+                                                options:ToResourceOptions(heap_properties_.Type)];
     if (!buffer_) {
         error("Fail to create a MTLBuffer");
         throw bad_alloc();

@@ -50,7 +50,7 @@ D3D12Texture::D3D12Texture(
         ? resource_desc_.DepthOrArraySize : 1;
     descriptor.allowGPUOptimizedContents = (resource_desc_.Layout == D3D12_TEXTURE_LAYOUT_UNKNOWN)
         ? YES : NO;
-    descriptor.resourceOptions = ToResourceStorageMode(heap_properties_.Type);
+    descriptor.resourceOptions = ToResourceOptions(heap_properties_.Type);
     descriptor.usage = ToTextureUsage(resource_desc_.Flags);
 
     texture_ = [device_->GetDevice() newTextureWithDescriptor:descriptor];
