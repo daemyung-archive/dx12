@@ -21,7 +21,7 @@ public:
         D3D12Device* device,
         const D3D12_HEAP_PROPERTIES* heap_properties,
         D3D12_HEAP_FLAGS heap_flags,
-        const D3D12_RESOURCE_DESC* resource_desc,
+        const D3D12_RESOURCE_DESC* desc,
         const D3D12_CLEAR_VALUE *clear_value);
 
     D3D12Texture(
@@ -29,7 +29,7 @@ public:
         DXGISwapChain* swap_chain,
         const D3D12_HEAP_PROPERTIES* heap_properties,
         D3D12_HEAP_FLAGS heap_flags,
-        const D3D12_RESOURCE_DESC* resource_desc);
+        const D3D12_RESOURCE_DESC* desc);
 
     HRESULT STDMETHODCALLTYPE Map(
         UINT Subresource,
@@ -43,6 +43,9 @@ public:
     bool isPresentable() const;
 
     id<MTLTexture> GetTexture() const;
+
+private:
+    void InitTexture();
 
 private:
     id<MTLTexture> texture_;

@@ -120,6 +120,11 @@ public:
     id<CAMetalDrawable> GetDrawable() const;
 
 private:
+    void InitLayer();
+
+    void InitTexture();
+
+private:
     D3D12CommandQueue* command_queue_ = { nullptr };
     DXGI_SWAP_CHAIN_DESC desc_;
     CAMetalLayer* layer_ = { nil };

@@ -6,8 +6,6 @@
 #ifndef DX12_METAL_HELPER_H_
 #define DX12_METAL_HELPER_H_
 
-#include <stdexcept>
-
 #include "dxgi.h"
 #include "metal_library.h"
 
@@ -34,7 +32,8 @@ inline auto ToPixelFormat(DXGI_FORMAT format) {
         case DXGI_FORMAT_D24_UNORM_S8_UINT:
             return MTLPixelFormatDepth24Unorm_Stencil8;
         default:
-            throw std::runtime_error("invalid format");
+            assert(false && "Invalid DXGI_FORMAT");
+            return MTLPixelFormatBGRA8Unorm;
     }
 }
 
@@ -83,7 +82,8 @@ inline auto ToTextureType(D3D12_RESOURCE_DIMENSION dimension, bool is_array, boo
         case D3D12_RESOURCE_DIMENSION_TEXTURE3D:
             return MTLTextureType3D;
         default:
-            throw std::runtime_error("invalid dimension");
+            assert(false && "Invalid D3D12_RESOURCE_DIMENSION");
+            return MTLTextureType2D;
     }
 }
 
@@ -97,7 +97,8 @@ inline auto ToResourceOptions(D3D12_HEAP_TYPE type) {
         case D3D12_HEAP_TYPE_READBACK:
             return MTLResourceStorageModeShared;
         default:
-            throw std::runtime_error("invalid dimension");
+            assert(false && "Invalid D3D12_HEAP_TYPE");
+            return MTLResourceStorageModePrivate;
     }
 }
 
@@ -137,7 +138,8 @@ inline auto GetSize(DXGI_FORMAT format) {
         case DXGI_FORMAT_R32G32B32A32_FLOAT:
             return 16;
         default:
-            throw std::runtime_error("invalid format");
+            assert(false && "Invalid DXGI_FORMAT");
+            return 4;
     }
 }
 
@@ -150,8 +152,6 @@ inline auto ToVertexStepFunction(D3D12_INPUT_CLASSIFICATION classification)
             return MTLVertexStepFunctionPerVertex;
         case D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA:
             return MTLVertexStepFunctionPerInstance;
-        default:
-            throw std::runtime_error("invalid the step rate");
     }
 }
 
@@ -167,7 +167,8 @@ inline auto ToVertexFormat(DXGI_FORMAT format)
         case DXGI_FORMAT_R32G32B32A32_FLOAT:
             return MTLVertexFormatFloat4;
         default:
-            throw std::runtime_error("invalid the format");
+            assert(false && "Invalid DXGI_FORMAT");
+            return MTLVertexFormatFloat4;
     }
 }
 
@@ -189,7 +190,8 @@ inline auto ToBlendFactor(D3D12_BLEND blend)
         case D3D12_BLEND_INV_DEST_ALPHA:
             return MTLBlendFactorOneMinusDestinationAlpha;
         default:
-            throw std::runtime_error("invalid the blend");
+            assert(false && "Invalid D3D12_BLEND");
+            return MTLBlendFactorZero;
     }
 }
 
@@ -209,7 +211,8 @@ inline auto ToBlendOperation(D3D12_BLEND_OP op)
         case D3D12_BLEND_OP_MAX:
             return MTLBlendOperationMax;
         default:
-            throw std::runtime_error("invalid the blend op");
+            assert(false && "Invalid D3D12_BLEND_OP");
+            return MTLBlendOperationAdd;
     }
 }
 
@@ -225,7 +228,8 @@ inline auto ToPrimitiveTopologyClass(D3D12_PRIMITIVE_TOPOLOGY_TYPE type)
         case D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE:
             return MTLPrimitiveTopologyClassTriangle;
         default:
-            throw std::runtime_error("invalid the topology type");
+            assert(false && "Invalid D3D12_PRIMITIVE_TOPOLOGY_TYPE");
+            return MTLPrimitiveTopologyClassTriangle;
     }
 }
 
@@ -240,7 +244,8 @@ inline auto ToPrimitiveType(D3D12_PRIMITIVE_TOPOLOGY topology) {
         case D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP:
             return MTLPrimitiveTypeTriangleStrip;
        default:
-            throw std::runtime_error("invalid the topology");
+            assert(false && "Invalid D3D12_PRIMITIVE_TOPOLOGY");
+            return MTLPrimitiveTypeTriangle;
     }
 }
 
@@ -256,5 +261,7 @@ inline auto ToCullMode(D3D12_CULL_MODE mode) {
             return MTLCullModeBack;
     }
 }
+
+//----------------------------------------------------------------------------------------------------------------------
 
 #endif // DX12_METAL_HELPER_H_

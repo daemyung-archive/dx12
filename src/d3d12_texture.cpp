@@ -6,7 +6,6 @@
 #include "d3d12_texture.h"
 
 #include <cassert>
-#include <new>
 #include <spdlog/spdlog.h>
 
 #include "dxgi_swap_chain.h"
@@ -24,40 +23,14 @@ D3D12Texture::D3D12Texture(
     D3D12Device* device,
     const D3D12_HEAP_PROPERTIES* heap_properties,
     D3D12_HEAP_FLAGS heap_flags,
-    const D3D12_RESOURCE_DESC* resource_desc,
+    const D3D12_RESOURCE_DESC* desc,
     const D3D12_CLEAR_VALUE *clear_value)
-: D3D12Resource(device, heap_properties, heap_flags, resource_desc)
+: D3D12Resource(device, heap_properties, heap_flags, desc)
 , texture_(nil)
 , swap_chain_(nullptr) {
-    assert(resource_desc_.Dimension != D3D12_RESOURCE_DIMENSION_BUFFER);
+    assert(desc_.Dimension != D3D12_RESOURCE_DIMENSION_BUFFER);
 
-    auto descriptor = [MTLTextureDescriptor new];
-    if (!descriptor) {
-        error("Fail to create a MTLTextureDescriptor");
-        return bad_alloc();
-    }
-
-    descriptor.textureType = ToTextureType(resource_desc_.Dimension,
-        resource_desc_.DepthOrArraySize, resource_desc_.SampleDesc.Count != 1);
-    descriptor.pixelFormat = ToPixelFormat(resource_desc_.Format);
-    descriptor.width = resource_desc_.Width;
-    descriptor.height = resource_desc_.Height;
-    descriptor.depth = (resource_desc_.Dimension == D3D12_RESOURCE_DIMENSION_TEXTURE3D)
-        ? resource_desc_.DepthOrArraySize : 1;
-    descriptor.mipmapLevelCount = resource_desc_.MipLevels;
-    descriptor.sampleCount = resource_desc_.SampleDesc.Count;
-    descriptor.arrayLength = (resource_desc_.Dimension != D3D12_RESOURCE_DIMENSION_TEXTURE3D)
-        ? resource_desc_.DepthOrArraySize : 1;
-    descriptor.allowGPUOptimizedContents = (resource_desc_.Layout == D3D12_TEXTURE_LAYOUT_UNKNOWN)
-        ? YES : NO;
-    descriptor.resourceOptions = ToResourceOptions(heap_properties_.Type);
-    descriptor.usage = ToTextureUsage(resource_desc_.Flags);
-
-    texture_ = [device_->GetDevice() newTextureWithDescriptor:descriptor];
-    if (!texture_) {
-        error("Fail to create a MTLTexture");
-        return bad_alloc();
-    }
+    InitTexture();
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -67,8 +40,8 @@ D3D12Texture::D3D12Texture(
     DXGISwapChain* swap_chain,
     const D3D12_HEAP_PROPERTIES* heap_properties,
     D3D12_HEAP_FLAGS heap_flags,
-    const D3D12_RESOURCE_DESC* resource_desc)
-: D3D12Resource(device, heap_properties, heap_flags, resource_desc)
+    const D3D12_RESOURCE_DESC* desc)
+: D3D12Resource(device, heap_properties, heap_flags, desc)
 , texture_(nil)
 , swap_chain_(swap_chain) {
 }
@@ -103,6 +76,44 @@ id<MTLTexture> D3D12Texture::GetTexture() const {
     } else {
         return texture_;
     }
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void D3D12Texture::InitTexture() {
+    auto descriptor = [MTLTextureDescriptor new];
+    assert(descriptor && "Fail to create MTLTextureDescriptor");
+
+    descriptor.textureType = ToTextureType(
+        desc_.Dimension,
+        desc_.DepthOrArraySize,
+        desc_.SampleDesc.Count != 1);
+    descriptor.pixelFormat = ToPixelFormat(desc_.Format);
+    descriptor.width = desc_.Width;
+    descriptor.height = desc_.Height;
+
+    if (desc_.Dimension == D3D12_RESOURCE_DIMENSION_TEXTURE3D) {
+        descriptor.depth = desc_.DepthOrArraySize;
+        descriptor.arrayLength = 1;
+    } else {
+        descriptor.depth = 1;
+        descriptor.arrayLength = desc_.DepthOrArraySize;
+    }
+
+    descriptor.mipmapLevelCount = desc_.MipLevels;
+    descriptor.sampleCount = desc_.SampleDesc.Count;
+
+    if (desc_.Layout == D3D12_TEXTURE_LAYOUT_UNKNOWN) {
+        descriptor.allowGPUOptimizedContents = YES;
+    } else {
+        descriptor.allowGPUOptimizedContents = NO;
+    }
+
+    descriptor.resourceOptions = ToResourceOptions(heap_properties_.Type);
+    descriptor.usage = ToTextureUsage(desc_.Flags);
+
+    texture_ = [device_->GetDevice() newTextureWithDescriptor:descriptor];
+    assert(texture_ && "Fail to create MTLTexture");
 }
 
 //----------------------------------------------------------------------------------------------------------------------

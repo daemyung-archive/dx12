@@ -27,40 +27,8 @@ DXGISwapChain::DXGISwapChain(
 : DXGIDeviceSubObject(factory, device)
 , command_queue_(command_queue)
 , desc_(*desc) {
-    layer_ = [CAMetalLayer layer];
-    if (!layer_) {
-        return bad_alloc();
-    }
-
-    layer_.device = device_->GetDevice();
-    layer_.pixelFormat = ToPixelFormat(desc_.BufferDesc.Format);
-    layer_.framebufferOnly = IsFramebufferOnly(desc_.BufferUsage);
-    layer_.maximumDrawableCount = desc_.BufferCount;
-    layer_.drawableSize = CGSizeMake(desc_.BufferDesc.Width, desc_.BufferDesc.Height);
-
-    [[ToWindow(desc_.OutputWindow) contentView] setLayer:layer_];
-
-    D3D12_HEAP_PROPERTIES heap_properties = {
-        .Type = D3D12_HEAP_TYPE_DEFAULT
-    };
-
-    D3D12_RESOURCE_DESC resource_desc = {
-        .Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D,
-        .Alignment = 0,
-        .Width = desc_.BufferDesc.Width,
-        .Height = desc_.BufferDesc.Height,
-        .DepthOrArraySize = 1,
-        .MipLevels = 1,
-        .Format = desc_.BufferDesc.Format,
-        .SampleDesc = desc_.SampleDesc,
-        .Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN,
-        .Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET
-    };
-
-    texture_ = make_unique<D3D12Texture>(device_, this, &heap_properties, D3D12_HEAP_FLAG_NONE, &resource_desc);
-    if (!texture_) {
-        return bad_alloc();
-    }
+    InitLayer();
+    InitTexture();
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -297,6 +265,55 @@ id<CAMetalDrawable> DXGISwapChain::GetDrawable() const {
     }
 
     return drawable_;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void DXGISwapChain::InitLayer() {
+    layer_ = [CAMetalLayer layer];
+    assert(layer_ && "Fail to create CAMetalLayer");
+
+    layer_.device = device_->GetDevice();
+    layer_.pixelFormat = ToPixelFormat(desc_.BufferDesc.Format);
+    layer_.framebufferOnly = IsFramebufferOnly(desc_.BufferUsage);
+    layer_.maximumDrawableCount = desc_.BufferCount;
+    layer_.drawableSize = CGSizeMake(
+        desc_.BufferDesc.Width,
+        desc_.BufferDesc.Height);
+
+    auto window = ToWindow(desc_.OutputWindow);
+    assert(window && "Invalid NSWindow");
+
+    [[window contentView] setLayer:layer_];
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void DXGISwapChain::InitTexture() {
+    D3D12_HEAP_PROPERTIES heap_properties = {
+        .Type = D3D12_HEAP_TYPE_DEFAULT
+    };
+
+    D3D12_RESOURCE_DESC desc = {
+        .Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D,
+        .Alignment = 0,
+        .Width = desc_.BufferDesc.Width,
+        .Height = desc_.BufferDesc.Height,
+        .DepthOrArraySize = 1,
+        .MipLevels = 1,
+        .Format = desc_.BufferDesc.Format,
+        .SampleDesc = desc_.SampleDesc,
+        .Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN,
+        .Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET
+    };
+
+    texture_ = make_unique<D3D12Texture>(
+        device_,
+        this,
+        &heap_properties,
+        D3D12_HEAP_FLAG_NONE,
+        &desc);
+    assert(texture_ && "Fail to create D3D12Texture");
 }
 
 //----------------------------------------------------------------------------------------------------------------------

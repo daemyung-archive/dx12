@@ -17,11 +17,11 @@ D3D12Resource::D3D12Resource(
     D3D12Device* device,
     const D3D12_HEAP_PROPERTIES* heap_properties,
     D3D12_HEAP_FLAGS heap_flags,
-    const D3D12_RESOURCE_DESC* resource_desc)
+    const D3D12_RESOURCE_DESC* desc)
 : D3D12Pageable(device),
   heap_properties_(*heap_properties),
   heap_flags_(heap_flags),
-  resource_desc_(*resource_desc) {
+  desc_(*desc) {
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -88,7 +88,7 @@ HRESULT STDMETHODCALLTYPE D3D12Resource::GetDevice(
 //----------------------------------------------------------------------------------------------------------------------
 
 D3D12_RESOURCE_DESC STDMETHODCALLTYPE D3D12Resource::GetDesc( void) {
-    return resource_desc_;
+    return desc_;
 }
 
 //----------------------------------------------------------------------------------------------------------------------

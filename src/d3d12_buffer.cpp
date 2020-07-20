@@ -6,7 +6,6 @@
 #include "d3d12_buffer.h"
 
 #include <cassert>
-#include <new>
 #include <spdlog/spdlog.h>
 
 #include "d3d12_device.h"
@@ -23,19 +22,14 @@ D3D12Buffer::D3D12Buffer(
     D3D12Device* device,
     const D3D12_HEAP_PROPERTIES* heap_properties,
     D3D12_HEAP_FLAGS heap_flags,
-    const D3D12_RESOURCE_DESC* resource_desc)
-: D3D12Resource(device, heap_properties, heap_flags, resource_desc)
+    const D3D12_RESOURCE_DESC* desc)
+: D3D12Resource(device, heap_properties, heap_flags, desc)
 , buffer_(nil) {
-    assert(resource_desc_.Dimension == D3D12_RESOURCE_DIMENSION_BUFFER);
-    assert(resource_desc_.Width != 0);
-    assert(resource_desc_.Height == 1);
+    assert(desc_.Dimension == D3D12_RESOURCE_DIMENSION_BUFFER);
+    assert(desc_.Width != 0);
+    assert(desc_.Height == 1);
 
-    buffer_ = [device_->GetDevice() newBufferWithLength:resource_desc_.Width
-                                                options:ToResourceOptions(heap_properties_.Type)];
-    if (!buffer_) {
-        error("Fail to create a MTLBuffer");
-        throw bad_alloc();
-    }
+    InitBuffer();
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -78,6 +72,14 @@ void D3D12Buffer::BindAsVertexBuffer(
 
 id<MTLBuffer> D3D12Buffer::GetBuffer() const {
     return buffer_;
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+void D3D12Buffer::InitBuffer() {
+    buffer_ = [device_->GetDevice() newBufferWithLength:desc_.Width
+                                                options:ToResourceOptions(heap_properties_.Type)];
+    assert(buffer_ && "Fail to create MTLBuffer");
 }
 
 //----------------------------------------------------------------------------------------------------------------------

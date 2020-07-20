@@ -16,6 +16,7 @@
 #include <cstdlib>
 #include <cwchar>
 #include <cstring>
+#include <climits>
 #include <objc/objc.h>
 
 #ifndef DX12_GLUE_H_
@@ -70,10 +71,6 @@ using LPCSTR   = const char*;
 using LPCWSTR  = const wchar_t*;
 using UINT_PTR = uint32_t;
 using LONG_PTR = uint64_t;
-
-//----------------------------------------------------------------------------------------------------------------------
-
-#define UINT_MAX UINT32_MAX
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -355,6 +352,8 @@ inline BOOL HeapFree(
     DWORD dwFlags,
     _Frees_ptr_opt_ LPVOID lpMem) {
     free(lpMem);
+
+    return true;
 }
 
 //----------------------------------------------------------------------------------------------------------------------
