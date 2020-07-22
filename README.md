@@ -39,3 +39,13 @@ vcpkg install spdlog
 mkdir build
 cmake . -B build -DCMAKE_TOOLCHAIN_FILE=${VCPKG_DIR}/script/buildsystem/vcpkg.cmake
 ```
+
+## Demos
+
+### Clear Render Target View
+
+![](screenshot/clear_render_target_view.png)
+
+### Triangle
+
+![](screenshot/triangle.png)
