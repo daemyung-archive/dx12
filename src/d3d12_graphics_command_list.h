@@ -314,6 +314,8 @@ private:
     std::vector<MTLScissorRect> scissor_rects_;
     D3D12PipelineState* pipeline_state_ = { nullptr };
     std::array<D3D12Buffer*, 16> vertex_buffers_;
+    D3D12Buffer* index_buffer_ = { nullptr };
+    MTLIndexType index_type_;
     MTLPrimitiveType primitive_type;
 };
 

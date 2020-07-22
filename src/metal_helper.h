@@ -264,4 +264,18 @@ inline auto ToCullMode(D3D12_CULL_MODE mode) {
 
 //----------------------------------------------------------------------------------------------------------------------
 
+inline auto ToIndexType(DXGI_FORMAT format) {
+    switch (format) {
+        case DXGI_FORMAT_R16_UINT:
+            return MTLIndexTypeUInt16;
+        case DXGI_FORMAT_R32_UINT:
+            return MTLIndexTypeUInt32;
+        default:
+            assert(false && "Invalid DXGI_FORMAT");
+            return MTLIndexTypeUInt16;
+    }
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
 #endif // DX12_METAL_HELPER_H_

@@ -43,6 +43,24 @@ TriangleApp::TriangleApp(GLFWwindow* window)
     }
 
     {
+        uint16_t indices[] = { 0, 1, 2 };
+
+        auto properties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+        auto desc = CD3DX12_RESOURCE_DESC::Buffer(sizeof(indices));
+        result = device_->CreateCommittedResource(&properties, D3D12_HEAP_FLAG_NONE, &desc,
+            D3D12_RESOURCE_STATE_COMMON, nullptr, IID_PPV_ARGS(&index_buffer_));
+        assert(SUCCEEDED(result));
+
+        void* data;
+        index_buffer_->Map(0, nullptr, &data);
+        memcpy(data, indices, sizeof(indices));
+
+        index_buffer_view_.BufferLocation = index_buffer_->GetGPUVirtualAddress();
+        index_buffer_view_.SizeInBytes = sizeof(indices);
+        index_buffer_view_.Format = DXGI_FORMAT_R16_UINT;
+    }
+
+    {
         ComPtr<ID3DBlob> vertex_code;
         result = CompileShader(L"../../demo/triangle.hlsl", nullptr, "VS", "vs_5_0", &vertex_code);
         assert(SUCCEEDED(result));
@@ -122,8 +140,9 @@ void TriangleApp::OnRender(double delta_time) {
     command_list_->OMSetRenderTargets(1, &back_buffer_view, true, &depth_stencil_view);
     command_list_->SetPipelineState(pipeline_state_.Get());
     command_list_->IASetVertexBuffers(0, 1, &vertex_buffer_view_);
+    command_list_->IASetIndexBuffer(&index_buffer_view_);
     command_list_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-    command_list_->DrawInstanced(3, 1, 0, 0);
+    command_list_->DrawIndexedInstanced(3, 1, 0, 0, 0);
 
     {
         auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(

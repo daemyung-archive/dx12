@@ -150,7 +150,14 @@ void STDMETHODCALLTYPE D3D12GraphicsCommandList::DrawIndexedInstanced(
     _In_  UINT StartIndexLocation,
     _In_  INT BaseVertexLocation,
     _In_  UINT StartInstanceLocation) {
-    assert(false && "Not implement!!!");
+    [render_command_encoder_ drawIndexedPrimitives:primitive_type
+                                        indexCount:IndexCountPerInstance
+                                         indexType:index_type_
+                                       indexBuffer:index_buffer_->GetBuffer()
+                                 indexBufferOffset:StartIndexLocation
+                                     instanceCount:InstanceCount
+                                        baseVertex:BaseVertexLocation
+                                      baseInstance:StartInstanceLocation];
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -433,7 +440,11 @@ void STDMETHODCALLTYPE D3D12GraphicsCommandList::SetGraphicsRootUnorderedAccessV
 
 void STDMETHODCALLTYPE D3D12GraphicsCommandList::IASetIndexBuffer(
     _In_opt_  const D3D12_INDEX_BUFFER_VIEW *pView) {
-    assert(false && "Not implement!!!");
+    auto buffer = reinterpret_cast<D3D12Buffer*>(pView->BufferLocation);
+    assert(buffer);
+
+    index_buffer_ = buffer;
+    index_type_ = ToIndexType(pView->Format);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
